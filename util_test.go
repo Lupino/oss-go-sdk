@@ -38,3 +38,18 @@ func TestGetHostPort(t *testing.T) {
 	defer testPanic(t)
 	host, port = getHostPort("example.com:invaid")
 }
+
+func TestIsOSSHost(t *testing.T) {
+	var got = isOSSHost("example.com", false)
+	if got {
+		t.Fatalf("isOSSHost: expect: false, got true")
+	}
+	got = isOSSHost("example.com", true)
+	if !got {
+		t.Fatalf("isOSSHost: expect: true, got false")
+	}
+	got = isOSSHost("aliyuncs.com", false)
+	if !got {
+		t.Fatalf("isOSSHost: expect: true, got false")
+	}
+}
