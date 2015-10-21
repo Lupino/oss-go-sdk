@@ -46,11 +46,14 @@ func getHostPort(origHost string) (host string, port int) {
 	host = origHost
 	port = 80
 	var hostPortList = strings.SplitN(origHost, ":", 2)
+	var err error
 	if len(hostPortList) == 1 {
 		host = strings.Trim(hostPortList[0], " ")
 	} else if len(hostPortList) == 2 {
 		host = strings.Trim(hostPortList[0], " ")
-		port, _ = strconv.Atoi(strings.Trim(hostPortList[0], " "))
+		if port, err = strconv.Atoi(strings.Trim(hostPortList[1], " ")); err != nil {
+			panic("Invalid: port is invalid")
+		}
 	}
 	return
 }
