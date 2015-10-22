@@ -79,3 +79,16 @@ func TestGetAssign(t *testing.T) {
 		t.Fatalf("authValue: expect: %s, got %s\n", expecttAuthValue, authValue)
 	}
 }
+
+func TestSafeGetElement(t *testing.T) {
+	var container = map[string]string{"key": "value"}
+	var got = safeGetElement("key", container)
+	if got != "value" {
+		t.Fatalf("safeGetElement: except: %s, but got: %s\n", "value", got)
+	}
+
+	got = safeGetElement("key1", container)
+	if got != "" {
+		t.Fatalf("safeGetElement: except: %s, but got: %s\n", "", got)
+	}
+}
