@@ -57,3 +57,25 @@ func TestIsOSSHost(t *testing.T) {
 		t.Fatalf("isOSSHost: expect: true, got false")
 	}
 }
+
+func TestGetAssign(t *testing.T) {
+	var headers = make(map[string]string)
+	headers["Content-MD5"] = "81f770d0950fe6a2c158fc7ee9cfb6d8"
+	headers["Content-type"] = "image/jpeg"
+	headers["date"] = "Wed, 21 Oct 2015 07:17:58 GMT"
+
+	var secretAccessKey = "secretAccessKey"
+	var authValue = getAssign(secretAccessKey, "GET", headers, "/", nil, true)
+	// fmt.Printf("authValue: %s\n", authValue)
+	var expecttAuthValue = "z3GSMKAock34CpDqxmdTEg81V0k="
+	if authValue != expecttAuthValue {
+		t.Fatalf("authValue: expect: %s, got %s\n", expecttAuthValue, authValue)
+	}
+	headers["x-oss-key"] = "test-x-oss-key"
+	authValue = getAssign(secretAccessKey, "GET", headers, "/", nil, false)
+	// fmt.Printf("authValue: %s\n", authValue)
+	expecttAuthValue = "QqFGy3l4JKba4YL2FXrTgVoYVMk="
+	if authValue != expecttAuthValue {
+		t.Fatalf("authValue: expect: %s, got %s\n", expecttAuthValue, authValue)
+	}
+}
