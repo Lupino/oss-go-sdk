@@ -15,6 +15,10 @@ func TestGetHostFromList(t *testing.T) {
 	if host != "example.com:80" {
 		t.Fatalf("host: except: %s, got: %s", "example.com:80", host)
 	}
+	host = getHostFromList("example.com:90,example1.com:90")
+	if host != "example.com:90" {
+		t.Fatalf("host: except: %s, got: %s", "example.com:90", host)
+	}
 }
 
 func testPanic(t *testing.T) {
