@@ -156,14 +156,21 @@ func getResource(params map[string]string) string {
 		"response-expires", "response-content-disposition", "cors", "lifecycle",
 		"restore", "qos", "referer", "append", "position"}
 
-	var values = url.Values{}
+	sort.Strings(overrideResponseList)
+
+	var resource = ""
+	var separator = "?"
 	for _, k := range overrideResponseList {
 		if v, ok := tmpHeaders[strings.ToLower(k)]; ok {
-			values.Set(k, v)
+			resource = fmt.Sprintf("%s%s%s", resource, separator, k)
+			if len(v) != 0 {
+				resource = fmt.Sprintf("%s=%s", resource, v)
+			}
+			separator = "&"
 		}
 	}
 
-	return "?" + values.Encode()
+	return resource
 }
 
 func quote(str string) string {
@@ -176,7 +183,7 @@ func isIP(s string) bool {
 		return true
 	}
 
-	var tmpList = strings.Split(s, ".")
+	var tmpList = strings.Split(host, ".")
 	if len(tmpList) != 4 {
 		return false
 	}
@@ -194,6 +201,13 @@ func appendParam(uri string, params map[string]string) string {
 	var values = url.Values{}
 	for k, v := range params {
 		k = strings.Replace(k, "_", "-", -1)
+		if k == "maxkeys" {
+			k = "max-keys"
+		}
+
+		if k == "acl" {
+			v = ""
+		}
 		values.Set(k, v)
 	}
 	return uri + "?" + values.Encode()

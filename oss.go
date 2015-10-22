@@ -149,6 +149,13 @@ func (api *API) httpRequest(method, bucket, object string,
 
 	var req *http.Request
 	var host string
+
+	if headers == nil {
+		headers = make(map[string]string)
+	}
+	if params == nil {
+		params = make(map[string]string)
+	}
 	for i := 0; i < api.retryTimes; i++ {
 		var _, port = getHostPort(api.host)
 		var schema = "http://"
