@@ -216,12 +216,10 @@ func (api *API) httpRequest(method, bucket, object string,
 		if res, err = client.Do(req); err != nil {
 			continue
 		}
-		if checkRedirect(res) {
-			// self.host = helper_get_host_from_resp(res, bucket)
-			continue
-		} else {
-			return
+		if res.Request.Host != api.host {
+			api.host = res.Request.Host
 		}
+		break
 	}
 	return
 }
