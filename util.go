@@ -9,7 +9,6 @@ import (
 	"io"
 	"log"
 	"net"
-	"net/http"
 	"net/url"
 	"regexp"
 	"sort"
@@ -232,13 +231,6 @@ func checkBucketValid(bucket string) bool {
 		return false
 	}
 	return true
-}
-
-func checkRedirect(res *http.Response) bool {
-	if res.StatusCode == 301 || res.StatusCode == 302 {
-		return true
-	}
-	return false
 }
 
 func getStringBase64MD5(str string) string {

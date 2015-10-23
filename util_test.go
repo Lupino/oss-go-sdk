@@ -1,7 +1,6 @@
 package oss
 
 import (
-	"net/http"
 	"testing"
 	//    "fmt"
 )
@@ -187,15 +186,6 @@ func TestCheckBucketValid(t *testing.T) {
 	}
 	got = checkBucketValid("bucKet")
 	except = false
-	if got != except {
-		t.Fatalf("checkBucketValid: except: %s, but got: %s\n", except, got)
-	}
-}
-
-func TestCheckRedirect(t *testing.T) {
-	var res = &http.Response{StatusCode: 301}
-	var got = checkRedirect(res)
-	var except = true
 	if got != except {
 		t.Fatalf("checkBucketValid: except: %s, but got: %s\n", except, got)
 	}
