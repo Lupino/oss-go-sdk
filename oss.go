@@ -51,6 +51,7 @@ type API struct {
 	timeout         int
 	isOSSDomain     bool
 	stsToken        string
+	provider        string
 }
 
 // NewAPI initial simple OSS API
@@ -69,6 +70,7 @@ func NewAPI(options *APIOptions) *API {
 	api.timeout = 60
 	api.isOSSDomain = false
 	api.stsToken = options.StsToken
+	api.provider = PROVIDER
 	return api
 }
 
@@ -118,7 +120,7 @@ func (api *API) SetIsOSSHost(isOSSHost bool) {
 // Returns:
 //     signature string
 func (api *API) createSignForNormalAuth(method string, headers map[string]string, resource string) string {
-	var authValue = fmt.Sprintf("%s %s:%s", PROVIDER, api.accessID,
+	var authValue = fmt.Sprintf("%s %s:%s", api.provider, api.accessID,
 		getAssign(api.secretAccessKey, method, headers, resource, nil, api.debug))
 	return authValue
 }
