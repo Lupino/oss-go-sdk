@@ -141,3 +141,81 @@ func TestGetBucketLifecycle(t *testing.T) {
 	}
 	fmt.Printf("%s\n", result)
 }
+
+func TestCreateBucket(t *testing.T) {
+	var err error
+	if err = api.CreateBucket("bucket", "", nil); err != nil {
+		t.Fatal(err)
+	}
+	if err = api.CreateBucket("bucket", "public-read-write", map[string]string{"other": "other"}); err != nil {
+		t.Fatal(err)
+	}
+	var config = CreateBucketConfiguration{
+		LocationConstraint: "oss-cn-hangzhou",
+	}
+	if err = api.PutBucket("bucket", "", &config, nil); err != nil {
+		t.Fatal(err)
+	}
+
+	if err = api.PutBucketACL("bucket", "public-read-write", nil); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestPutBucketReferer(t *testing.T) {
+	var config = RefererConfiguration{
+		AllowEmptyReferer: true,
+		RefererList:       []string{"http://test.com", "http://example.com"},
+	}
+	if err := api.PutBucketReferer("bucket", config); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestPutBucketWebsite(t *testing.T) {
+	if err := api.PutBucketWebsite("bucket", "index.html", "error.html"); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestPutBucketLifecycle(t *testing.T) {
+	var rule = LifecycleRule{
+		ID:             "ID",
+		Prefix:         "Prefix",
+		Status:         "Status",
+		ExpirationDays: 1,
+	}
+	if err := api.PutBucketLifecycle("bucket", rule); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestPutBucketLogging(t *testing.T) {
+	if err := api.PutBucketLogging("bucket", "bucket1", "eaa"); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestDeleteBucket(t *testing.T) {
+	if err := api.DeleteBucket("bucket"); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestDeleteBucketLifecycle(t *testing.T) {
+	if err := api.DeleteBucketLifecycle("bucket"); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestDeleteBucketWebsite(t *testing.T) {
+	if err := api.DeleteBucketWebsite("bucket"); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestDeleteLogging(t *testing.T) {
+	if err := api.DeleteLogging("bucket"); err != nil {
+		t.Fatal(err)
+	}
+}
