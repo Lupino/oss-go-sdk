@@ -2,9 +2,11 @@ package oss
 
 import (
 	"crypto/hmac"
+	"crypto/md5"
 	"crypto/sha1"
 	"encoding/base64"
 	"fmt"
+	"io"
 	"log"
 	"net"
 	"net/http"
@@ -237,4 +239,10 @@ func checkRedirect(res *http.Response) bool {
 		return true
 	}
 	return false
+}
+
+func getStringBase64MD5(str string) string {
+	h := md5.New()
+	io.WriteString(h, str)
+	return base64.StdEncoding.EncodeToString(h.Sum(nil))
 }
