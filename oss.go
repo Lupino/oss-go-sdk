@@ -106,110 +106,75 @@ func (api *API) SetIsOSSHost(isOSSHost bool) {
 	api.isOSSDomain = isOSSHost
 }
 
+// SignURLOptions defined sign url options
+type SignURLOptions struct {
+	Method   string            // one of PUT, GET, DELETE, HEAD
+	URL      string            // HTTP address of bucket or object, eg: http://HOST/bucket/object
+	Headers  map[string]string // HTTP header
+	Resource string            // path of bucket or bbject, eg: /bucket/ or /bucket/object
+	Timeout  time.Duration
+	Params   map[string]string
+	Object   string // only for SignURL
+	Bucket   string // only for SignURL
+}
+
+// GetDefaultSignURLOptions defined default sign url options
+func GetDefaultSignURLOptions() *SignURLOptions {
+	var options = new(SignURLOptions)
+	options.Method = "GET"
+	options.Headers = make(map[string]string)
+	options.Params = make(map[string]string)
+	options.Resource = "/"
+	options.Timeout = 60 * time.Second
+	return options
+}
+
 // SignURLAuthWithExpireTime Create the authorization for OSS based on the input method, url, body and headers
-//
-// :type method: string
-// :param method: one of PUT, GET, DELETE, HEAD
-//
-// :type url: string
-// :param:HTTP address of bucket or object, eg: http://HOST/bucket/object
-//
-// :type headers: dict
-// :param: HTTP header
-//
-// :type resource: string
-// :param:path of bucket or object, eg: /bucket/ or /bucket/object
-//
-// :type timeout: int
-// :param
 //
 // Returns:
 //     signature url.
-func (api *API) SignURLAuthWithExpireTime(method, url string, headers map[string]string,
-	resource string, timeout time.Duration, params map[string]string) string {
-	if headers != nil {
-		headers = make(map[string]string)
-	}
-	if params != nil {
-		params = make(map[string]string)
-	}
-	if len(resource) == 0 {
-		resource = "/"
-	}
-	if timeout < 0 {
-		timeout = 60 * time.Second
-	}
-	var sendTime = time.Now().Add(timeout).Format("Wed, 21 Oct 2015 07:17:58 GMT")
-	headers["Date"] = sendTime
-	var authValue = getAssign(api.secretAccessKey, method, headers, resource, nil, api.debug)
-	params["OSSAccessKeyId"] = api.accessID
-	params["Expires"] = sendTime
-	params["Signature"] = authValue
-	var signURL = appendParam(url, params)
+func (api *API) SignURLAuthWithExpireTime(options *SignURLOptions) string {
+	var sendTime = time.Now().Add(options.Timeout).Format("Wed, 21 Oct 2015 07:17:58 GMT")
+	options.Headers["Date"] = sendTime
+	var authValue = getAssign(api.secretAccessKey, options.Method, options.Headers,
+		options.Resource, nil, api.debug)
+	options.Params["OSSAccessKeyId"] = api.accessID
+	options.Params["Expires"] = sendTime
+	options.Params["Signature"] = authValue
+	var signURL = appendParam(options.URL, options.Params)
 	return signURL
 }
 
 // SignURL Create the authorization for OSS based on the input method, url, body and headers
 //
-// :type method: string
-// :param method: one of PUT, GET, DELETE, HEAD
-//
-// :type bucket: string
-// :param:
-//
-// :type object: string
-// :param:
-//
-// :type timeout: int
-// :param
-//
-// :type headers: dict
-// :param: HTTP header
-//
-// :type params: dict
-// :param: the parameters that put in the url address as query string
-//
-// :type resource: string
-// :param:path of bucket or object, eg: /bucket/ or /bucket/object
-//
 // Returns:
 //     signature url.
-func (api *API) SignURL(method, bucket, object string, timeout time.Duration,
-	headers map[string]string, params map[string]string) string {
-	if headers != nil {
-		headers = make(map[string]string)
-	}
-	if params != nil {
-		params = make(map[string]string)
-	}
-	if timeout < 0 {
-		timeout = 60 * time.Second
-	}
-	var sendTime = time.Now().Add(timeout).Format("Wed, 21 Oct 2015 07:17:58 GMT")
-	headers["Date"] = sendTime
-	var resource = fmt.Sprintf("/%s/%s%s", bucket, object, getResource(params))
-	var authValue = getAssign(api.secretAccessKey, method, headers, resource, nil, api.debug)
-	params["OSSAccessKeyId"] = api.accessID
-	params["Expires"] = sendTime
-	params["Signature"] = authValue
+func (api *API) SignURL(options *SignURLOptions) string {
+	var sendTime = time.Now().Add(options.Timeout).Format("Wed, 21 Oct 2015 07:17:58 GMT")
+	options.Headers["Date"] = sendTime
+	var resource = fmt.Sprintf("/%s/%s%s", options.Bucket, options.Object, getResource(options.Params))
+	var authValue = getAssign(api.secretAccessKey, options.Method, options.Headers, resource, nil, api.debug)
+	options.Params["OSSAccessKeyId"] = api.accessID
+	options.Params["Expires"] = sendTime
+	options.Params["Signature"] = authValue
 	var url = ""
-	object = quote(object)
+	options.Object = quote(options.Object)
 	var schema = "http"
 	if api.isSecurity {
 		schema = "https"
 	}
 	if isIP(api.host) {
-		url = fmt.Sprintf("%s://%s/%s/%s", schema, api.host, bucket, object)
+		url = fmt.Sprintf("%s://%s/%s/%s", schema, api.host, options.Bucket, options.Object)
 	} else if isOSSHost(api.host, api.isOSSDomain) {
-		if checkBucketValid(bucket) {
-			url = fmt.Sprintf("%s://%s.%s/%s", schema, bucket, api.host, object)
+		if checkBucketValid(options.Bucket) {
+			url = fmt.Sprintf("%s://%s.%s/%s", schema, options.Bucket, api.host, options.Object)
 		} else {
-			url = fmt.Sprintf("%s://%s/%s/%s", schema, api.host, bucket, object)
+			url = fmt.Sprintf("%s://%s/%s/%s", schema, api.host, options.Bucket, options.Object)
 		}
 	} else {
-		url = fmt.Sprintf("%s://%s/%s", schema, api.host, object)
+		url = fmt.Sprintf("%s://%s/%s", schema, api.host, options.Object)
 	}
-	var signURL = appendParam(url, params)
+	var signURL = appendParam(url, options.Params)
 	return signURL
 }
 

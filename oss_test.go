@@ -219,3 +219,35 @@ func TestDeleteLogging(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestSignURL(t *testing.T) {
+	var apiOptions = GetDefaultAPIOptioins()
+	var options = GetDefaultSignURLOptions()
+	apiOptions.IsSecurity = true
+	var api = NewAPI(apiOptions)
+	var signURL = api.SignURL(options)
+	fmt.Printf("SignURL: %s\n", signURL)
+
+	apiOptions.Host = "127.0.0.1"
+	api = NewAPI(apiOptions)
+	signURL = api.SignURL(options)
+	fmt.Printf("SignURL: %s\n", signURL)
+
+	apiOptions.Host = "example.com"
+	api = NewAPI(apiOptions)
+	signURL = api.SignURL(options)
+	fmt.Printf("SignURL: %s\n", signURL)
+
+	apiOptions.Host = "example.com"
+	api = NewAPI(apiOptions)
+	options.Bucket = "bucket"
+	api.SetIsOSSHost(true)
+	signURL = api.SignURL(options)
+	fmt.Printf("SignURL: %s\n", signURL)
+}
+
+func TestSignURLAuthWithExpireTime(t *testing.T) {
+	var options = GetDefaultSignURLOptions()
+	var signURL = api.SignURLAuthWithExpireTime(options)
+	fmt.Printf("SignURL: %s\n", signURL)
+}
