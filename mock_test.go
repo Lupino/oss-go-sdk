@@ -33,6 +33,11 @@ func handle() *http.ServeMux {
 	})
 	mux.HandleFunc("/bucket/", func(w http.ResponseWriter, req *http.Request) {
 		var query = req.URL.Query()
+		var method = req.Method
+		if method != "GET" {
+			fmt.Fprintf(w, "success")
+			return
+		}
 		if _, ok := query["acl"]; ok {
 			fmt.Fprintf(w, `
             <?xml version="1.0" ?>
