@@ -199,18 +199,6 @@ func (api *API) createSignForNormalAuth(method string, headers map[string]string
 	return authValue
 }
 
-// BucketOperation defined bucket operation
-func (api *API) BucketOperation(method, bucket string, headers map[string]string,
-	params map[string]string) (*http.Response, error) {
-	return api.httpRequest(method, bucket, "", headers, nil, params)
-}
-
-// ObjectOperation defined object operation
-func (api *API) ObjectOperation(method, bucket, object string, headers map[string]string,
-	body io.Reader, params map[string]string) (*http.Response, error) {
-	return api.httpRequest(method, bucket, object, headers, body, params)
-}
-
 // RequestOptions defined requset options
 type RequestOptions struct {
 	Method  string // one of PUT, GET, DELETE, HEAD, POST
