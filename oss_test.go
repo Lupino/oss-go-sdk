@@ -32,20 +32,22 @@ func getHostFromURL(uri string) string {
 }
 
 func TestHttpRequest(t *testing.T) {
-	var res *http.Response
 	var err error
+	var reqOptions = new(RequestOptions)
+	reqOptions.Method = "GET"
 	tls := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintln(w, "Hello, client")
 	}))
 	defer tls.Close()
 
-	options = GetDefaultAPIOptioins()
+	var options = GetDefaultAPIOptioins()
 	options.Host = getHostFromURL(tls.URL)
 	options.IsSecurity = true
 	options.StsToken = "sts_token"
-	api = NewAPI(options)
-	res, err = api.httpRequest("GET", "", "", nil, nil, nil)
-	fmt.Printf("%v, %v\n", res, err)
+	var api = NewAPI(options)
+
+	err = api.httpRequest(reqOptions, nil)
+	fmt.Printf("%v\n", err)
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintln(w, "Hello, client")

@@ -2,11 +2,12 @@ package oss
 
 import (
 	"bytes"
+	"encoding/xml"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"runtime"
-	"strconv"
 	"time"
 )
 
@@ -245,38 +246,43 @@ func (api *API) ObjectOperation(method, bucket, object string, headers map[strin
 	return api.httpRequest(method, bucket, object, headers, body, params)
 }
 
+// RequestOptions defined requset options
+type RequestOptions struct {
+	Method  string // one of PUT, GET, DELETE, HEAD, POST
+	Bucket  string
+	Object  string
+	Headers map[string]string // HTTP header
+	Body    io.Reader
+	Params  map[string]string
+ }
+
+// GetDefaultRequestOptions get default requrest options
+func GetDefaultRequestOptions() *RequestOptions {
+	var options = new(RequestOptions)
+	options.Method = "GET"
+	options.Headers = make(map[string]string)
+	options.Params = make(map[string]string)
+	return options
+ }
+
 // httpRequest Send http request of operation
 //
-// :type method: string
-// :param method: one of PUT, GET, DELETE, HEAD, POST
-//
-// :type bucket: string
+// :type options: RequestOptions
 // :param
 //
-// :type object: string
+// :type result: interface{}
 // :param
-//
-// :type headers: dict
-// :param: HTTP header
-//
-// :type body: string
-// :param
-//
-// Returns:
-//     HTTP Response
-func (api *API) httpRequest(method, bucket, object string,
-	headers map[string]string,
-	body io.Reader,
-	params map[string]string) (res *http.Response, err error) {
+func (api *API) httpRequest(options *RequestOptions, result interface{}) (err error) {
 
 	var req *http.Request
+	var res *http.Response
 	var host string
 
-	if headers == nil {
-		headers = make(map[string]string)
+	if options.Headers == nil {
+		options.Headers = make(map[string]string)
 	}
-	if params == nil {
-		params = make(map[string]string)
+	if options.Params == nil {
+		options.Params = make(map[string]string)
 	}
 	for i := 0; i < api.retryTimes; i++ {
 		var _, port = getHostPort(api.host)
@@ -289,47 +295,47 @@ func (api *API) httpRequest(method, bucket, object string,
 		var resource string
 
 		if len(api.stsToken) > 0 {
-			headers["x-oss-security-token"] = api.stsToken
+			options.Headers["x-oss-security-token"] = api.stsToken
 		}
 
-		if len(bucket) == 0 {
+		if len(options.Bucket) == 0 {
 			resource = "/"
-			headers["Host"] = api.host
+			options.Headers["Host"] = api.host
 		} else {
-			headers["Host"] = fmt.Sprintf("%s.%s", bucket, api.host)
+			options.Headers["Host"] = fmt.Sprintf("%s.%s", options.Bucket, api.host)
 			if !isOSSHost(api.host, api.isOSSDomain) {
-				headers["Host"] = api.host
+				options.Headers["Host"] = api.host
 			}
-			resource = fmt.Sprintf("/%s/", bucket)
+			resource = fmt.Sprintf("/%s/", options.Bucket)
 		}
 
-		resource = fmt.Sprintf("%s%s%s", resource, object, getResource(params))
-		object = quote(object)
-		var url = fmt.Sprintf("/%s", object)
+		resource = fmt.Sprintf("%s%s%s", resource, options.Object, getResource(options.Params))
+		options.Object = quote(options.Object)
+		var url = fmt.Sprintf("/%s", options.Object)
 		if isIP(api.host) {
-			url = fmt.Sprintf("/%s/%s", bucket, object)
-			if len(bucket) == 0 {
-				url = fmt.Sprintf("/%s", object)
+			url = fmt.Sprintf("/%s/%s", options.Bucket, options.Object)
+			if len(options.Bucket) == 0 {
+				url = fmt.Sprintf("/%s", options.Object)
 			}
-			headers["Host"] = api.host
+			options.Headers["Host"] = api.host
 		}
 
-		url = appendParam(url, params)
-		// date = time.strftime("%a, %d %b %Y %H:%M:%S GMT", time.gmtime())
-		headers["Date"] = time.Now().Format("Wed, 21 Oct 2015 07:17:58 GMT")
-		headers["Authorization"] = api.createSignForNormalAuth(method, headers, resource)
-		headers["User-Agent"] = api.agent
-		if checkBucketValid(bucket) && !isIP(api.host) {
-			host = headers["Host"]
+		url = appendParam(url, options.Params)
+		options.Headers["Date"] = time.Now().Format("Wed, 21 Oct 2015 07:17:58 GMT")
+		options.Headers["Authorization"] = api.createSignForNormalAuth(options.Method, options.Headers, resource)
+		options.Headers["User-Agent"] = api.agent
+		if checkBucketValid(options.Bucket) && !isIP(api.host) {
+			host = options.Headers["Host"]
 		} else {
 			host = api.host
 		}
 
-		if req, err = http.NewRequest(method, schema+host+url, body); err != nil {
+		fmt.Printf("%s %s%s%s %s\n", options.Method, schema, host, url, options.Headers["Host"])
+		if req, err = http.NewRequest(options.Method, schema+host+url, options.Body); err != nil {
 			continue
 		}
 
-		for k, v := range headers {
+		for k, v := range options.Headers {
 			req.Header.Add(k, v)
 		}
 
