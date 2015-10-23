@@ -487,7 +487,7 @@ func (api *API) PutBucketACL(bucket, acl string, headers map[string]string) erro
 }
 
 // PutBucketLogging Put bucket logging
-func (api *API) PutBucketLogging(sourcebucket, targetbucket, prefix string) (error) {
+func (api *API) PutBucketLogging(sourcebucket, targetbucket, prefix string) error {
 	var options = GetDefaultRequestOptions()
 	options.Method = "PUT"
 	options.Bucket = sourcebucket
@@ -526,7 +526,7 @@ func (api *API) PutBucketWebsite(bucket, indexfile, errorfile string) error {
 }
 
 // PutBucketLifecycle put bucket lifecycle
-func (api *API) PutBucketLifecycle(bucket string, rule LifecycleRule) (error) {
+func (api *API) PutBucketLifecycle(bucket string, rule LifecycleRule) error {
 	var options = GetDefaultRequestOptions()
 	options.Method = "PUT"
 	options.Bucket = bucket
