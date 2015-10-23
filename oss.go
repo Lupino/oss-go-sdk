@@ -104,6 +104,113 @@ func (api *API) SetIsOSSHost(isOSSHost bool) {
 	api.isOSSDomain = isOSSHost
 }
 
+// SignURLAuthWithExpireTime Create the authorization for OSS based on the input method, url, body and headers
+//
+// :type method: string
+// :param method: one of PUT, GET, DELETE, HEAD
+//
+// :type url: string
+// :param:HTTP address of bucket or object, eg: http://HOST/bucket/object
+//
+// :type headers: dict
+// :param: HTTP header
+//
+// :type resource: string
+// :param:path of bucket or object, eg: /bucket/ or /bucket/object
+//
+// :type timeout: int
+// :param
+//
+// Returns:
+//     signature url.
+func (api *API) SignURLAuthWithExpireTime(method, url string, headers map[string]string,
+	resource string, timeout time.Duration, params map[string]string) string {
+	if headers != nil {
+		headers = make(map[string]string)
+	}
+	if params != nil {
+		params = make(map[string]string)
+	}
+	if len(resource) == 0 {
+		resource = "/"
+	}
+	if timeout < 0 {
+		timeout = 60 * time.Second
+	}
+	var sendTime = time.Now().Add(timeout).Format("Wed, 21 Oct 2015 07:17:58 GMT")
+	headers["Date"] = sendTime
+	var authValue = getAssign(api.secretAccessKey, method, headers, resource, nil, api.debug)
+	params["OSSAccessKeyId"] = api.accessID
+	params["Expires"] = sendTime
+	params["Signature"] = authValue
+	var signURL = appendParam(url, params)
+	return signURL
+}
+
+// SignURL Create the authorization for OSS based on the input method, url, body and headers
+//
+// :type method: string
+// :param method: one of PUT, GET, DELETE, HEAD
+//
+// :type bucket: string
+// :param:
+//
+// :type object: string
+// :param:
+//
+// :type timeout: int
+// :param
+//
+// :type headers: dict
+// :param: HTTP header
+//
+// :type params: dict
+// :param: the parameters that put in the url address as query string
+//
+// :type resource: string
+// :param:path of bucket or object, eg: /bucket/ or /bucket/object
+//
+// Returns:
+//     signature url.
+func (api *API) SignURL(method, bucket, object string, timeout time.Duration,
+	headers map[string]string, params map[string]string) string {
+	if headers != nil {
+		headers = make(map[string]string)
+	}
+	if params != nil {
+		params = make(map[string]string)
+	}
+	if timeout < 0 {
+		timeout = 60 * time.Second
+	}
+	var sendTime = time.Now().Add(timeout).Format("Wed, 21 Oct 2015 07:17:58 GMT")
+	headers["Date"] = sendTime
+	var resource = fmt.Sprintf("/%s/%s%s", bucket, object, getResource(params))
+	var authValue = getAssign(api.secretAccessKey, method, headers, resource, nil, api.debug)
+	params["OSSAccessKeyId"] = api.accessID
+	params["Expires"] = sendTime
+	params["Signature"] = authValue
+	var url = ""
+	object = quote(object)
+	var schema = "http"
+	if api.isSecurity {
+		schema = "https"
+	}
+	if isIP(api.host) {
+		url = fmt.Sprintf("%s://%s/%s/%s", schema, api.host, bucket, object)
+	} else if isOSSHost(api.host, api.isOSSDomain) {
+		if checkBucketValid(bucket) {
+			url = fmt.Sprintf("%s://%s.%s/%s", schema, bucket, api.host, object)
+		} else {
+			url = fmt.Sprintf("%s://%s/%s/%s", schema, api.host, bucket, object)
+		}
+	} else {
+		url = fmt.Sprintf("%s://%s/%s", schema, api.host, object)
+	}
+	var signURL = appendParam(url, params)
+	return signURL
+}
+
 // createSignForNormalAuth NOT public API
 // Create the authorization for OSS based on header input.
 // it should be put into "Authorization" parameter of header.
