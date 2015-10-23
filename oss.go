@@ -254,7 +254,7 @@ type RequestOptions struct {
 	Headers map[string]string // HTTP header
 	Body    io.Reader
 	Params  map[string]string
- }
+}
 
 // GetDefaultRequestOptions get default requrest options
 func GetDefaultRequestOptions() *RequestOptions {
@@ -263,7 +263,7 @@ func GetDefaultRequestOptions() *RequestOptions {
 	options.Headers = make(map[string]string)
 	options.Params = make(map[string]string)
 	return options
- }
+}
 
 // httpRequest Send http request of operation
 //
@@ -347,139 +347,112 @@ func (api *API) httpRequest(options *RequestOptions, result interface{}) (err er
 		if res.Request.Host != api.host {
 			api.host = res.Request.Host
 		}
+		if result != nil {
+			var data []byte
+			if data, err = ioutil.ReadAll(res.Body); err != nil {
+				continue
+			}
+
+			if err = xml.Unmarshal(data, result); err != nil {
+				continue
+			}
+		}
 		break
 	}
 	return
 }
 
 // GetService List all buckets of user
-func (api *API) GetService(headers map[string]string, prefix, marker, maxKeys string) (*http.Response, error) {
-	return api.ListAllMyBuckets(headers, prefix, marker, maxKeys)
+func (api *API) GetService(result *ListAllMyBucketsResult, headers map[string]string) error {
+	return api.ListAllMyBuckets(result, headers)
 }
 
 // ListAllMyBuckets List all buckets of user
-// type headers: dict
-// :param
-//
-// Returns:
-//     HTTP Response
-func (api *API) ListAllMyBuckets(headers map[string]string, prefix, marker, maxKeys string) (*http.Response, error) {
-	var params = make(map[string]string)
-	if prefix != "" {
-		params["prefix"] = prefix
+func (api *API) ListAllMyBuckets(result *ListAllMyBucketsResult, headers map[string]string) error {
+	var options = GetDefaultRequestOptions()
+	if result.Prefix != "" {
+		options.Params["prefix"] = result.Prefix
 	}
-	if marker != "" {
-		params["marker"] = marker
+	if result.Marker != "" {
+		options.Params["marker"] = result.Marker
 	}
-	if maxKeys != "" {
-		params["max-keys"] = maxKeys
+	if result.MaxKeys != "" {
+		options.Params["max-keys"] = result.MaxKeys
 	}
-	return api.httpRequest("GET", "", "", headers, nil, params)
+	options.Headers = headers
+	return api.httpRequest(options, result)
 }
 
 // GetBucketACL Get Access Control Level of bucket
-//
-// :type bucket: string
-// :param
-//
-// Returns:
-//     HTTP Response
-func (api *API) GetBucketACL(bucket string) (*http.Response, error) {
-	return api.httpRequest("GET", bucket, "", nil, nil, map[string]string{"acl": ""})
+func (api *API) GetBucketACL(bucket string, result *AccessControlPolicy) error {
+	var options = GetDefaultRequestOptions()
+	options.Bucket = bucket
+	options.Params["acl"] = "acl"
+	return api.httpRequest(options, result)
 }
 
 // GetBucketLocation Get Location of bucket
-func (api *API) GetBucketLocation(bucket string) (*http.Response, error) {
-	return api.httpRequest("GET", bucket, "", nil, nil, map[string]string{"location": ""})
+func (api *API) GetBucketLocation(bucket string, result *LocationConstraint) error {
+	var options = GetDefaultRequestOptions()
+	options.Bucket = bucket
+	options.Params["location"] = "location"
+	return api.httpRequest(options, result)
 }
 
 // GetBucket List object that in bucket
-func (api *API) GetBucket(bucket, prefix, marker, delimiter, maxKeys string, headers map[string]string, encodingType string) (*http.Response, error) {
-	return api.ListBucket(bucket, prefix, marker, delimiter, maxKeys, headers, encodingType)
+func (api *API) GetBucket(bucket string, result *ListBucketResult, headers map[string]string) error {
+	return api.ListBucket(bucket, result, headers)
 }
 
 // ListBucket List object that in bucket
-//
-// :type bucket: string
-// :param
-//
-// :type prefix: string
-// :param
-//
-// :type marker: string
-// :param
-//
-// :type delimiter: string
-// :param
-//
-// :type maxkeys: string
-// :param
-//
-// :type headers: dict
-// :param: HTTP header
-//
-// :type maxkeys: string
-// :encoding_type
-//
-// Returns:
-//     HTTP Response
-func (api *API) ListBucket(bucket, prefix, marker, delimiter, maxkeys string, headers map[string]string, encodingType string) (*http.Response, error) {
-	var params = make(map[string]string)
-	params["prefix"] = prefix
-	params["marker"] = marker
-	params["delimiter"] = delimiter
-	params["max-keys"] = maxkeys
-	params["encoding-type"] = encodingType
-	return api.httpRequest("GET", bucket, "", headers, nil, params)
+func (api *API) ListBucket(bucket string, result *ListBucketResult, headers map[string]string) error {
+	var options = GetDefaultRequestOptions()
+	options.Bucket = bucket
+	options.Method = "GET"
+	options.Params["prefix"] = result.Prefix
+	options.Params["marker"] = result.Marker
+	options.Params["delimiter"] = result.Delimiter
+	options.Params["max-keys"] = result.MaxKeys
+	options.Params["encoding-type"] = result.EncodingType
+	options.Headers = headers
+	return api.httpRequest(options, result)
 }
 
-// GetWebsite Get bucket website
-//
-// :type bucket: string
-// :param
-//
-// Returns:
-//     HTTP Response
-func (api *API) GetWebsite(bucket string, headers map[string]string) (*http.Response, error) {
-	return api.httpRequest("GET", bucket, "", headers, nil, map[string]string{"website": ""})
+// GetBucketWebsite Get bucket website
+func (api *API) GetBucketWebsite(bucket string, result *WebsiteConfiguration) error {
+	var options = GetDefaultRequestOptions()
+	options.Bucket = bucket
+	options.Params["website"] = "website"
+	return api.httpRequest(options, result)
 }
 
-// GetLifecycle Get bucket lifecycle
-//
-// :type bucket: string
-// :param
-//
-// Returns:
-//     HTTP Response
-func (api *API) GetLifecycle(bucket string, headers map[string]string) (*http.Response, error) {
-	return api.httpRequest("GET", bucket, "", headers, nil, map[string]string{"lifecycle": ""})
+// GetBucketReferer Get bucket referer list
+func (api *API) GetBucketReferer(bucket string, result *RefererConfiguration) error {
+	var options = GetDefaultRequestOptions()
+	options.Bucket = bucket
+	options.Params["referer"] = "referer"
+	return api.httpRequest(options, result)
 }
 
-// GetLogging Get bucket logging
-//
-// :type bucket: string
-// :param
-//
-// Returns:
-//     HTTP Response
-func (api *API) GetLogging(bucket string, headers map[string]string) (*http.Response, error) {
-	return api.httpRequest("GET", bucket, "", headers, nil, map[string]string{"logging": ""})
+// GetBucketLifecycle Get bucket lifecycle
+func (api *API) GetBucketLifecycle(bucket string, result *LifecycleConfiguration) error {
+	var options = GetDefaultRequestOptions()
+	options.Bucket = bucket
+	options.Params["lifecycle"] = "lifecycle"
+	return api.httpRequest(options, result)
 }
 
-// GetCors Get bucket cors
-//
-// :type bucket: string
-// :param
-//
-// Returns:
-//     HTTP Response
-func (api *API) GetCors(bucket string, headers map[string]string) (*http.Response, error) {
-	return api.httpRequest("GET", bucket, "", headers, nil, map[string]string{"cors": ""})
+// GetBucketLogging Get bucket logging
+func (api *API) GetBucketLogging(bucket string, result *BucketLoggingStatus) error {
+	var options = GetDefaultRequestOptions()
+	options.Bucket = bucket
+	options.Params["logging"] = "logging"
+	return api.httpRequest(options, result)
 }
 
 // CreateBucket defined create bucket
-func (api *API) CreateBucket(bucket, acl string, headers map[string]string) (*http.Response, error) {
-	return api.PutBucket(bucket, acl, headers)
+func (api *API) CreateBucket(bucket, acl string, headers map[string]string) error {
+	return api.PutBucket(bucket, acl, nil, headers)
 }
 
 // PutBucket create bucket
@@ -490,55 +463,49 @@ func (api *API) CreateBucket(bucket, acl string, headers map[string]string) (*ht
 // :type acl: string
 // :param: one of private public-read public-read-write
 //
-// :type headers: dict
+// :type headers: map[string]string
 // :param: HTTP header
-//
-// Returns:
-//     HTTP Response
-func (api *API) PutBucket(bucket, acl string, headers map[string]string) (*http.Response, error) {
-	if headers == nil {
-		headers = make(map[string]string)
+func (api *API) PutBucket(bucket, acl string, config *CreateBucketConfiguration, headers map[string]string) error {
+	var options = GetDefaultRequestOptions()
+	options.Method = "PUT"
+	if headers != nil {
+		options.Headers = headers
 	}
 	if acl != "" {
 		if "AWS" == api.provider {
-			headers["x-amz-acl"] = acl
+			options.Headers["x-amz-acl"] = acl
 		} else {
-			headers["x-oss-acl"] = acl
+			options.Headers["x-oss-acl"] = acl
 		}
 	}
-	return api.httpRequest("PUT", bucket, "", headers, nil, nil)
-}
-
-// PutLogging Put bucket logging
-//
-// :type sourcebucket: string
-// :param
-//
-// :type targetbucket: string
-// :param: Specifies the bucket where you want Aliyun OSS to store server access logs
-//
-// :type prefix: string
-// :param: This element lets you specify a prefix for the objects that the log files will be stored
-//
-// Returns:
-//     HTTP Response
-func (api *API) PutLogging(sourcebucket, targetbucket, prefix string) (*http.Response, error) {
-	var buffer = bytes.NewBuffer(nil)
-	buffer.WriteString("<BucketLoggingStatus>")
-	if len(targetbucket) > 0 {
-		buffer.WriteString("<LoggingEnabled>")
-		buffer.WriteString("<TargetBucket>" + targetbucket + "</TargetBucket>")
-		if len(prefix) > 0 {
-			buffer.WriteString("<TargetPrefix>" + prefix + "</TargetPrefix>")
-		}
-		buffer.WriteString("</LoggingEnabled>")
+	if config != nil {
+		var data, _ = xml.Marshal(config)
+		options.Body = bytes.NewBuffer(data)
 	}
-	buffer.WriteString("</BucketLoggingStatus>")
-
-	return api.httpRequest("PUT", sourcebucket, "", nil, buffer, map[string]string{"logging": ""})
+	return api.httpRequest(options, nil)
 }
 
-// PutWebsite Put bucket website
+// PutBucketACL create bucket with acl or update bucket acl when bucket is exists
+func (api *API) PutBucketACL(bucket, acl string, headers map[string]string) error {
+	return api.PutBucket(bucket, acl, nil, headers)
+}
+
+// PutBucketLogging Put bucket logging
+func (api *API) PutBucketLogging(sourcebucket, targetbucket, prefix string) (error) {
+	var options = GetDefaultRequestOptions()
+	options.Method = "PUT"
+	options.Bucket = sourcebucket
+	var status = BucketLoggingStatus{
+		Bucket: targetbucket,
+		Prefix: prefix,
+	}
+	var data, _ = xml.Marshal(status)
+	options.Body = bytes.NewBuffer(data)
+	options.Params["logging"] = "logging"
+	return api.httpRequest(options, nil)
+}
+
+// PutBucketWebsite Put bucket website
 //
 // :type bucket: string
 // :param
@@ -548,142 +515,78 @@ func (api *API) PutLogging(sourcebucket, targetbucket, prefix string) (*http.Res
 //
 // :type errorfile: string
 // :param: the object taht contain error page
-//
-// Returns:
-//     HTTP Response
-func (api *API) PutWebsite(bucket, indexfile, errorfile string) (*http.Response, error) {
-	var buffer = bytes.NewBufferString(
-		fmt.Sprintf("<WebsiteConfiguration><IndexDocument><Suffix>%s</Suffix></IndexDocument><ErrorDocument><Key>%s</Key></ErrorDocument></WebsiteConfiguration>", indexfile, errorfile))
-	return api.httpRequest("PUT", bucket, "", nil, buffer, map[string]string{"website": ""})
+func (api *API) PutBucketWebsite(bucket, indexfile, errorfile string) error {
+	var options = GetDefaultRequestOptions()
+	options.Method = "PUT"
+	options.Bucket = bucket
+	var config = WebsiteConfiguration{
+		IndexSuffix: indexfile,
+		ErrorKey:    errorfile,
+	}
+	var data, _ = xml.Marshal(config)
+	options.Body = bytes.NewBuffer(data)
+	options.Params["website"] = "website"
+	return api.httpRequest(options, nil)
 }
 
-// PutLifecycle put bucket lifecycle
-// :type bucket: string
-// :param
-//
-// :type lifecycle: string
-// :param: lifecycle configuration
-//
-// Returns:
-//     HTTP Response
-func (api *API) PutLifecycle(bucket, lifecycle string) (*http.Response, error) {
-	var buffer = bytes.NewBufferString(lifecycle)
-	return api.httpRequest("PUT", bucket, "", nil, buffer, map[string]string{"lifecycle": ""})
+// PutBucketLifecycle put bucket lifecycle
+func (api *API) PutBucketLifecycle(bucket string, rule LifecycleRule) (error) {
+	var options = GetDefaultRequestOptions()
+	options.Method = "PUT"
+	options.Bucket = bucket
+	var config = LifecycleConfiguration{
+		Rule: rule,
+	}
+	var data, _ = xml.Marshal(config)
+	options.Body = bytes.NewBuffer(data)
+	options.Params["lifecycle"] = "lifecycle"
+	return api.httpRequest(options, nil)
 }
 
-// PutCors put bucket cors
-//
-// :type bucket: string
-// :param
-//
-// :type cors_xml: string
-// :param: the xml that contain cors rules
-//
-// Returns:
-//     HTTP Response
-func (api *API) PutCors(bucket, corsXML string, headers map[string]string) (*http.Response, error) {
-	var buffer = bytes.NewBufferString(corsXML)
-	if headers == nil {
-		headers = make(map[string]string)
-	}
-	headers["Content-Length"] = strconv.Itoa(len(corsXML))
-	var base64md5 = getStringBase64MD5(corsXML)
-	headers["Content-MD5"] = base64md5
-	return api.httpRequest("PUT", bucket, "", headers, buffer, map[string]string{"cors": ""})
-}
-
-// PutBucketWithLocation create bucket with location
-//
-// :type bucket: string
-// :param
-//
-// :type acl: string
-// :param: one of private public-read public-read-write
-//
-// :type location: string
-// :param:
-//
-// :type headers: dict
-// :param: HTTP header
-//
-// Returns:
-//     HTTP Response
-func (api *API) PutBucketWithLocation(bucket, acl, location string, headers map[string]string) (*http.Response, error) {
-	if headers == nil {
-		headers = make(map[string]string)
-	}
-	if acl != "" {
-		if "AWS" == api.provider {
-			headers["x-amz-acl"] = acl
-		} else {
-			headers["x-oss-acl"] = acl
-		}
-	}
-	var buffer = bytes.NewBuffer(nil)
-	if location != "" {
-		buffer.WriteString("<CreateBucketConfiguration>")
-		buffer.WriteString("<LocationConstraint>")
-		buffer.WriteString(location)
-		buffer.WriteString("</LocationConstraint>")
-		buffer.WriteString("</CreateBucketConfiguration>")
-	}
-	return api.httpRequest("PUT", bucket, "", headers, buffer, nil)
+// PutBucketReferer put bucket referer
+func (api *API) PutBucketReferer(bucket string, config RefererConfiguration) error {
+	var options = GetDefaultRequestOptions()
+	options.Method = "PUT"
+	options.Bucket = bucket
+	var data, _ = xml.Marshal(config)
+	options.Body = bytes.NewBuffer(data)
+	options.Params["referer"] = "referer"
+	var base64md5 = getBase64MD5(data)
+	options.Headers["Content-MD5"] = base64md5
+	return api.httpRequest(options, nil)
 }
 
 // DeleteBucket List object that in bucket
-//
-// :type bucket: string
-// :param
-//
-// :type headers: dict
-// :param: HTTP header
-//
-// Returns:
-//     HTTP Response
-func (api *API) DeleteBucket(bucket string, headers map[string]string) (*http.Response, error) {
-	return api.httpRequest("DELETE", bucket, "", headers, nil, nil)
+func (api *API) DeleteBucket(bucket string) error {
+	var options = GetDefaultRequestOptions()
+	options.Method = "DELETE"
+	options.Bucket = bucket
+	return api.httpRequest(options, nil)
 }
 
-// DeleteWebsite Delete bucket website
-//
-// :type bucket: string
-// :param
-//
-// Returns:
-//     HTTP Response
-func (api *API) DeleteWebsite(bucket string, headers map[string]string) (*http.Response, error) {
-	return api.httpRequest("DELETE", bucket, "", headers, nil, map[string]string{"website": ""})
+// DeleteBucketWebsite Delete bucket website
+func (api *API) DeleteBucketWebsite(bucket string) error {
+	var options = GetDefaultRequestOptions()
+	options.Method = "DELETE"
+	options.Bucket = bucket
+	options.Params["website"] = "website"
+	return api.httpRequest(options, nil)
 }
 
-// DeleteLifecycle Delete bucket lifecycle
-//
-// :type bucket: string
-// :param
-//
-// Returns:
-//     HTTP Response
-func (api *API) DeleteLifecycle(bucket string, headers map[string]string) (*http.Response, error) {
-	return api.httpRequest("DELETE", bucket, "", headers, nil, map[string]string{"lifecycle": ""})
+// DeleteBucketLifecycle Delete bucket lifecycle
+func (api *API) DeleteBucketLifecycle(bucket string) error {
+	var options = GetDefaultRequestOptions()
+	options.Method = "DELETE"
+	options.Bucket = bucket
+	options.Params["lifecycle"] = "lifecycle"
+	return api.httpRequest(options, nil)
 }
 
 // DeleteLogging Delete bucket logging
-//
-// :type bucket: string
-// :param
-//
-// Returns:
-//     HTTP Response
-func (api *API) DeleteLogging(bucket string, headers map[string]string) (*http.Response, error) {
-	return api.httpRequest("DELETE", bucket, "", headers, nil, map[string]string{"logging": ""})
-}
-
-// DeleteCors Delete bucket cors
-//
-// :type bucket: string
-// :param
-//
-// Returns:
-//     HTTP Response
-func (api *API) DeleteCors(bucket string, headers map[string]string) (*http.Response, error) {
-	return api.httpRequest("DELETE", bucket, "", headers, nil, map[string]string{"cors": ""})
+func (api *API) DeleteLogging(bucket string) error {
+	var options = GetDefaultRequestOptions()
+	options.Method = "DELETE"
+	options.Bucket = bucket
+	options.Params["logging"] = "logging"
+	return api.httpRequest(options, nil)
 }

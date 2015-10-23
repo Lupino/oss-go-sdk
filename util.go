@@ -246,3 +246,9 @@ func getStringBase64MD5(str string) string {
 	io.WriteString(h, str)
 	return base64.StdEncoding.EncodeToString(h.Sum(nil))
 }
+
+func getBase64MD5(str []byte) string {
+	h := md5.New()
+	h.Write(str)
+	return base64.StdEncoding.EncodeToString(h.Sum(nil))
+}
