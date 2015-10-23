@@ -6,6 +6,7 @@ import (
 	"crypto/sha1"
 	"encoding/base64"
 	"fmt"
+	"io"
 	"log"
 	"net"
 	"net/url"
@@ -235,5 +236,11 @@ func checkBucketValid(bucket string) bool {
 func getBase64MD5(str []byte) string {
 	h := md5.New()
 	h.Write(str)
+	return base64.StdEncoding.EncodeToString(h.Sum(nil))
+}
+
+func getBase64MD5WithReader(reader io.Reader) string {
+	h := md5.New()
+	io.Copy(h, reader)
 	return base64.StdEncoding.EncodeToString(h.Sum(nil))
 }

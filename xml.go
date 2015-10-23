@@ -121,3 +121,23 @@ type CreateBucketConfiguration struct {
 	XMLName            xml.Name `xml:"CreateBucketConfiguration"`
 	LocationConstraint string
 }
+
+// CopyObjectResult defined copy object result
+type CopyObjectResult struct {
+	XMLName      xml.Name `xml:"CopyObjectResult"`
+	LastModified time.Time
+	ETag         string
+}
+
+// DeleteXML defined delete multiple objects xml
+type DeleteXML struct {
+	XMLName xml.Name `xml:"Delete"`
+	Quiet   bool
+	Objects []string `xml:"Object>Key"`
+}
+
+// DeleteResult defined delete result
+type DeleteResult struct {
+	XMLName xml.Name `xml:"DeleteResult"`
+	Objects []string `xml:"Deleted>Key"`
+}

@@ -1,6 +1,7 @@
 package oss
 
 import (
+	"bufio"
 	"bytes"
 	"encoding/xml"
 	"fmt"
@@ -8,6 +9,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"runtime"
+	"strconv"
 	"time"
 )
 
@@ -543,4 +545,158 @@ func (api *API) DeleteLogging(bucket string) error {
 	options.Bucket = bucket
 	options.Params["logging"] = "logging"
 	return api.httpRequestWithUnmarshalXML(options, nil)
+}
+
+// GetObject defined get object
+func (api *API) GetObject(bucket, object string, headers, params map[string]string) (io.Reader, error) {
+	var options = GetDefaultRequestOptions()
+	options.Bucket = bucket
+	options.Object = object
+	options.Headers = headers
+	options.Params = params
+
+	var res *http.Response
+	var err error
+	if res, err = api.httpRequest(options); err != nil {
+		return nil, err
+	}
+
+	var reader = bufio.NewReader(res.Body)
+	return reader, nil
+}
+
+// GetObjectACL defined get object acl
+func (api *API) GetObjectACL(bucket, object string, result *AccessControlPolicy) error {
+	var options = GetDefaultRequestOptions()
+	options.Bucket = bucket
+	options.Object = object
+	options.Params["acl"] = "acl"
+	return api.httpRequestWithUnmarshalXML(options, result)
+}
+
+// HeadObject defined head object
+func (api *API) HeadObject(bucket, object string, headers map[string]string) (result http.Header, err error) {
+	var options = GetDefaultRequestOptions()
+	options.Method = "HEAD"
+	options.Bucket = bucket
+	options.Object = object
+	var res *http.Response
+	if res, err = api.httpRequest(options); err != nil {
+		return
+	}
+	return res.Header, nil
+}
+
+// PutObject defined put object
+func (api *API) PutObject(bucket, object string, body io.ReadSeeker, headers map[string]string) error {
+	var options = GetDefaultRequestOptions()
+	options.Method = "PUT"
+	options.Bucket = bucket
+	options.Object = object
+	if headers != nil {
+		options.Headers = headers
+	}
+
+	options.Headers["Content-MD5"] = getBase64MD5WithReader(body)
+	body.Seek(0, 0)
+	options.Body = body
+	var err error
+	if _, err = api.httpRequest(options); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// PutObjectACL defined put object acl
+func (api *API) PutObjectACL(bucket, object, acl string) error {
+	var options = GetDefaultRequestOptions()
+	options.Method = "PUT"
+	options.Bucket = bucket
+	options.Object = object
+	options.Headers["x-oss-object-acl"] = acl
+	options.Params["acl"] = "acl"
+	if _, err := api.httpRequest(options); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// CopyObject defined copy object
+func (api *API) CopyObject(sourceBucket, sourceObject, targetBucket, targetObject string,
+	headers map[string]string) (result CopyObjectResult, err error) {
+	var options = GetDefaultRequestOptions()
+	options.Method = "PUT"
+	options.Bucket = targetBucket
+	options.Object = targetObject
+	if headers != nil {
+		options.Headers = headers
+	}
+
+	options.Headers["x-oss-copy-source"] = fmt.Sprintf("/%s/%s", sourceBucket, quote(sourceObject))
+	if err = api.httpRequestWithUnmarshalXML(options, &result); err != nil {
+		return
+	}
+
+	return
+}
+
+// AppendObject defined append object
+func (api *API) AppendObject(bucket, object string, position int, body io.ReadSeeker,
+	headers map[string]string) (result http.Header, err error) {
+
+	var options = GetDefaultRequestOptions()
+	options.Method = "PUT"
+	options.Bucket = bucket
+	options.Object = object
+	if headers != nil {
+		options.Headers = headers
+	}
+
+	options.Headers["Content-MD5"] = getBase64MD5WithReader(body)
+	body.Seek(0, 0)
+	options.Body = body
+	options.Params["append"] = "append"
+	options.Params["postion"] = strconv.Itoa(position)
+	var res *http.Response
+	if res, err = api.httpRequest(options); err != nil {
+		return
+	}
+
+	result = res.Header
+
+	return
+
+}
+
+// DeleteObject defined delete object
+func (api *API) DeleteObject(bucket, object string) error {
+	var options = GetDefaultRequestOptions()
+	options.Method = "DELETE"
+	options.Bucket = bucket
+	options.Object = object
+	return api.httpRequestWithUnmarshalXML(options, nil)
+}
+
+// DeleteObjects defined delete multiple object
+func (api *API) DeleteObjects(bucket string, objects []string, result *DeleteResult) error {
+	var options = GetDefaultRequestOptions()
+	options.Method = "POST"
+	options.Bucket = bucket
+
+	var quiet = false
+	if result == nil {
+		quiet = true
+	}
+
+	var deleteXML = DeleteXML{
+		Quiet:   quiet,
+		Objects: objects,
+	}
+
+	var data, _ = xml.Marshal(deleteXML)
+	options.Body = bytes.NewBuffer(data)
+	options.Params["delete"] = "delete"
+	return api.httpRequestWithUnmarshalXML(options, result)
 }
