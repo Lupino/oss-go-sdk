@@ -472,11 +472,7 @@ func (api *API) PutBucket(bucket, acl string, config *CreateBucketConfiguration,
 		options.Headers = headers
 	}
 	if acl != "" {
-		if "AWS" == api.provider {
-			options.Headers["x-amz-acl"] = acl
-		} else {
-			options.Headers["x-oss-acl"] = acl
-		}
+		options.Headers["x-oss-acl"] = acl
 	}
 	if config != nil {
 		var data, _ = xml.Marshal(config)
