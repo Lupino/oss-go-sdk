@@ -42,7 +42,6 @@ type API struct {
 	sendBufferSize  int
 	recvBufferSize  int
 	host            string
-	port            int
 	accessID        string
 	secretAccessKey string
 	showBar         bool
