@@ -53,7 +53,7 @@ func TestHttpRequest(t *testing.T) {
 	options.StsToken = "sts_token"
 	var api = NewAPI(options)
 
-	err = api.httpRequest(reqOptions, nil)
+	_, err = api.httpRequest(reqOptions)
 	fmt.Printf("%v\n", err)
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -64,7 +64,7 @@ func TestHttpRequest(t *testing.T) {
 	options = GetDefaultAPIOptioins()
 	options.Host = getHostFromURL(ts.URL)
 	api = NewAPI(options)
-	err = api.httpRequest(reqOptions, nil)
+	_, err = api.httpRequest(reqOptions)
 	fmt.Printf("%v\n", err)
 }
 

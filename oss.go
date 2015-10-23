@@ -219,16 +219,9 @@ func GetDefaultRequestOptions() *RequestOptions {
 }
 
 // httpRequest Send http request of operation
-//
-// :type options: RequestOptions
-// :param
-//
-// :type result: interface{}
-// :param
-func (api *API) httpRequest(options *RequestOptions, result interface{}) (err error) {
+func (api *API) httpRequest(options *RequestOptions) (res *http.Response, err error) {
 
 	var req *http.Request
-	var res *http.Response
 	var host string
 
 	if options.Headers == nil {
@@ -300,19 +293,31 @@ func (api *API) httpRequest(options *RequestOptions, result interface{}) (err er
 		if res.Request.Host != api.host {
 			api.host = res.Request.Host
 		}
-		if result != nil {
-			var data []byte
-			if data, err = ioutil.ReadAll(res.Body); err != nil {
-				continue
-			}
-
-			if err = xml.Unmarshal(data, result); err != nil {
-				continue
-			}
-		}
 		break
 	}
 	return
+}
+
+// httpRequestWithUnmarshalXML http request and xml unmarshal
+func (api *API) httpRequestWithUnmarshalXML(options *RequestOptions, result interface{}) error {
+	var data []byte
+	var err error
+	var res *http.Response
+
+	if res, err = api.httpRequest(options); err != nil {
+		return err
+	}
+
+	if result != nil {
+		if data, err = ioutil.ReadAll(res.Body); err != nil {
+			return err
+		}
+
+		if err = xml.Unmarshal(data, result); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // GetService List all buckets of user
@@ -333,7 +338,7 @@ func (api *API) ListAllMyBuckets(result *ListAllMyBucketsResult, headers map[str
 		options.Params["max-keys"] = result.MaxKeys
 	}
 	options.Headers = headers
-	return api.httpRequest(options, result)
+	return api.httpRequestWithUnmarshalXML(options, result)
 }
 
 // GetBucketACL Get Access Control Level of bucket
@@ -341,7 +346,7 @@ func (api *API) GetBucketACL(bucket string, result *AccessControlPolicy) error {
 	var options = GetDefaultRequestOptions()
 	options.Bucket = bucket
 	options.Params["acl"] = "acl"
-	return api.httpRequest(options, result)
+	return api.httpRequestWithUnmarshalXML(options, result)
 }
 
 // GetBucketLocation Get Location of bucket
@@ -349,7 +354,7 @@ func (api *API) GetBucketLocation(bucket string, result *LocationConstraint) err
 	var options = GetDefaultRequestOptions()
 	options.Bucket = bucket
 	options.Params["location"] = "location"
-	return api.httpRequest(options, result)
+	return api.httpRequestWithUnmarshalXML(options, result)
 }
 
 // GetBucket List object that in bucket
@@ -368,7 +373,7 @@ func (api *API) ListBucket(bucket string, result *ListBucketResult, headers map[
 	options.Params["max-keys"] = result.MaxKeys
 	options.Params["encoding-type"] = result.EncodingType
 	options.Headers = headers
-	return api.httpRequest(options, result)
+	return api.httpRequestWithUnmarshalXML(options, result)
 }
 
 // GetBucketWebsite Get bucket website
@@ -376,7 +381,7 @@ func (api *API) GetBucketWebsite(bucket string, result *WebsiteConfiguration) er
 	var options = GetDefaultRequestOptions()
 	options.Bucket = bucket
 	options.Params["website"] = "website"
-	return api.httpRequest(options, result)
+	return api.httpRequestWithUnmarshalXML(options, result)
 }
 
 // GetBucketReferer Get bucket referer list
@@ -384,7 +389,7 @@ func (api *API) GetBucketReferer(bucket string, result *RefererConfiguration) er
 	var options = GetDefaultRequestOptions()
 	options.Bucket = bucket
 	options.Params["referer"] = "referer"
-	return api.httpRequest(options, result)
+	return api.httpRequestWithUnmarshalXML(options, result)
 }
 
 // GetBucketLifecycle Get bucket lifecycle
@@ -392,7 +397,7 @@ func (api *API) GetBucketLifecycle(bucket string, result *LifecycleConfiguration
 	var options = GetDefaultRequestOptions()
 	options.Bucket = bucket
 	options.Params["lifecycle"] = "lifecycle"
-	return api.httpRequest(options, result)
+	return api.httpRequestWithUnmarshalXML(options, result)
 }
 
 // GetBucketLogging Get bucket logging
@@ -400,7 +405,7 @@ func (api *API) GetBucketLogging(bucket string, result *BucketLoggingStatus) err
 	var options = GetDefaultRequestOptions()
 	options.Bucket = bucket
 	options.Params["logging"] = "logging"
-	return api.httpRequest(options, result)
+	return api.httpRequestWithUnmarshalXML(options, result)
 }
 
 // CreateBucket defined create bucket
@@ -431,7 +436,7 @@ func (api *API) PutBucket(bucket, acl string, config *CreateBucketConfiguration,
 		var data, _ = xml.Marshal(config)
 		options.Body = bytes.NewBuffer(data)
 	}
-	return api.httpRequest(options, nil)
+	return api.httpRequestWithUnmarshalXML(options, nil)
 }
 
 // PutBucketACL create bucket with acl or update bucket acl when bucket is exists
@@ -451,7 +456,7 @@ func (api *API) PutBucketLogging(sourcebucket, targetbucket, prefix string) erro
 	var data, _ = xml.Marshal(status)
 	options.Body = bytes.NewBuffer(data)
 	options.Params["logging"] = "logging"
-	return api.httpRequest(options, nil)
+	return api.httpRequestWithUnmarshalXML(options, nil)
 }
 
 // PutBucketWebsite Put bucket website
@@ -475,7 +480,7 @@ func (api *API) PutBucketWebsite(bucket, indexfile, errorfile string) error {
 	var data, _ = xml.Marshal(config)
 	options.Body = bytes.NewBuffer(data)
 	options.Params["website"] = "website"
-	return api.httpRequest(options, nil)
+	return api.httpRequestWithUnmarshalXML(options, nil)
 }
 
 // PutBucketLifecycle put bucket lifecycle
@@ -489,7 +494,7 @@ func (api *API) PutBucketLifecycle(bucket string, rule LifecycleRule) error {
 	var data, _ = xml.Marshal(config)
 	options.Body = bytes.NewBuffer(data)
 	options.Params["lifecycle"] = "lifecycle"
-	return api.httpRequest(options, nil)
+	return api.httpRequestWithUnmarshalXML(options, nil)
 }
 
 // PutBucketReferer put bucket referer
@@ -502,7 +507,7 @@ func (api *API) PutBucketReferer(bucket string, config RefererConfiguration) err
 	options.Params["referer"] = "referer"
 	var base64md5 = getBase64MD5(data)
 	options.Headers["Content-MD5"] = base64md5
-	return api.httpRequest(options, nil)
+	return api.httpRequestWithUnmarshalXML(options, nil)
 }
 
 // DeleteBucket List object that in bucket
@@ -510,7 +515,7 @@ func (api *API) DeleteBucket(bucket string) error {
 	var options = GetDefaultRequestOptions()
 	options.Method = "DELETE"
 	options.Bucket = bucket
-	return api.httpRequest(options, nil)
+	return api.httpRequestWithUnmarshalXML(options, nil)
 }
 
 // DeleteBucketWebsite Delete bucket website
@@ -519,7 +524,7 @@ func (api *API) DeleteBucketWebsite(bucket string) error {
 	options.Method = "DELETE"
 	options.Bucket = bucket
 	options.Params["website"] = "website"
-	return api.httpRequest(options, nil)
+	return api.httpRequestWithUnmarshalXML(options, nil)
 }
 
 // DeleteBucketLifecycle Delete bucket lifecycle
@@ -528,7 +533,7 @@ func (api *API) DeleteBucketLifecycle(bucket string) error {
 	options.Method = "DELETE"
 	options.Bucket = bucket
 	options.Params["lifecycle"] = "lifecycle"
-	return api.httpRequest(options, nil)
+	return api.httpRequestWithUnmarshalXML(options, nil)
 }
 
 // DeleteLogging Delete bucket logging
@@ -537,5 +542,5 @@ func (api *API) DeleteLogging(bucket string) error {
 	options.Method = "DELETE"
 	options.Bucket = bucket
 	options.Params["logging"] = "logging"
-	return api.httpRequest(options, nil)
+	return api.httpRequestWithUnmarshalXML(options, nil)
 }
