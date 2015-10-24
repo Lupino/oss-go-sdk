@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/xml"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -292,8 +293,9 @@ func (api *API) httpRequest(options *RequestOptions) (res *http.Response, err er
 		if res, err = client.Do(req); err != nil {
 			continue
 		}
-		if res.Request.Host != api.host {
-			api.host = res.Request.Host
+		if res.StatusCode/100 != 2 {
+			var errStr, _ = ioutil.ReadAll(res.Body)
+			err = errors.New(string(errStr))
 		}
 		break
 	}
