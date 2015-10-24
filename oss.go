@@ -335,7 +335,7 @@ func (api *API) ListAllMyBuckets(result *ListAllMyBucketsResult, headers map[str
 func (api *API) GetBucketACL(bucket string, result *AccessControlPolicy) error {
 	var options = GetDefaultRequestOptions()
 	options.Bucket = bucket
-	options.Params["acl"] = "acl"
+	options.Params["acl"] = ""
 	return api.httpRequestWithUnmarshalXML(options, result)
 }
 
@@ -343,7 +343,7 @@ func (api *API) GetBucketACL(bucket string, result *AccessControlPolicy) error {
 func (api *API) GetBucketLocation(bucket string, result *LocationConstraint) error {
 	var options = GetDefaultRequestOptions()
 	options.Bucket = bucket
-	options.Params["location"] = "location"
+	options.Params["location"] = ""
 	return api.httpRequestWithUnmarshalXML(options, result)
 }
 
@@ -370,7 +370,7 @@ func (api *API) ListBucket(bucket string, result *ListBucketResult, headers map[
 func (api *API) GetBucketWebsite(bucket string, result *WebsiteConfiguration) error {
 	var options = GetDefaultRequestOptions()
 	options.Bucket = bucket
-	options.Params["website"] = "website"
+	options.Params["website"] = ""
 	return api.httpRequestWithUnmarshalXML(options, result)
 }
 
@@ -378,7 +378,7 @@ func (api *API) GetBucketWebsite(bucket string, result *WebsiteConfiguration) er
 func (api *API) GetBucketReferer(bucket string, result *RefererConfiguration) error {
 	var options = GetDefaultRequestOptions()
 	options.Bucket = bucket
-	options.Params["referer"] = "referer"
+	options.Params["referer"] = ""
 	return api.httpRequestWithUnmarshalXML(options, result)
 }
 
@@ -386,7 +386,7 @@ func (api *API) GetBucketReferer(bucket string, result *RefererConfiguration) er
 func (api *API) GetBucketLifecycle(bucket string, result *LifecycleConfiguration) error {
 	var options = GetDefaultRequestOptions()
 	options.Bucket = bucket
-	options.Params["lifecycle"] = "lifecycle"
+	options.Params["lifecycle"] = ""
 	return api.httpRequestWithUnmarshalXML(options, result)
 }
 
@@ -394,7 +394,7 @@ func (api *API) GetBucketLifecycle(bucket string, result *LifecycleConfiguration
 func (api *API) GetBucketLogging(bucket string, result *BucketLoggingStatus) error {
 	var options = GetDefaultRequestOptions()
 	options.Bucket = bucket
-	options.Params["logging"] = "logging"
+	options.Params["logging"] = ""
 	return api.httpRequestWithUnmarshalXML(options, result)
 }
 
@@ -445,7 +445,7 @@ func (api *API) PutBucketLogging(sourcebucket, targetbucket, prefix string) erro
 	}
 	var data, _ = xml.Marshal(status)
 	options.Body = bytes.NewBuffer(data)
-	options.Params["logging"] = "logging"
+	options.Params["logging"] = ""
 	return api.httpRequestWithUnmarshalXML(options, nil)
 }
 
@@ -469,7 +469,7 @@ func (api *API) PutBucketWebsite(bucket, indexfile, errorfile string) error {
 	}
 	var data, _ = xml.Marshal(config)
 	options.Body = bytes.NewBuffer(data)
-	options.Params["website"] = "website"
+	options.Params["website"] = ""
 	return api.httpRequestWithUnmarshalXML(options, nil)
 }
 
@@ -483,7 +483,7 @@ func (api *API) PutBucketLifecycle(bucket string, rule LifecycleRule) error {
 	}
 	var data, _ = xml.Marshal(config)
 	options.Body = bytes.NewBuffer(data)
-	options.Params["lifecycle"] = "lifecycle"
+	options.Params["lifecycle"] = ""
 	return api.httpRequestWithUnmarshalXML(options, nil)
 }
 
@@ -494,7 +494,7 @@ func (api *API) PutBucketReferer(bucket string, config RefererConfiguration) err
 	options.Bucket = bucket
 	var data, _ = xml.Marshal(config)
 	options.Body = bytes.NewBuffer(data)
-	options.Params["referer"] = "referer"
+	options.Params["referer"] = ""
 	var base64md5 = getBase64MD5(data)
 	options.Headers["Content-MD5"] = base64md5
 	return api.httpRequestWithUnmarshalXML(options, nil)
@@ -513,7 +513,7 @@ func (api *API) DeleteBucketWebsite(bucket string) error {
 	var options = GetDefaultRequestOptions()
 	options.Method = "DELETE"
 	options.Bucket = bucket
-	options.Params["website"] = "website"
+	options.Params["website"] = ""
 	return api.httpRequestWithUnmarshalXML(options, nil)
 }
 
@@ -522,16 +522,16 @@ func (api *API) DeleteBucketLifecycle(bucket string) error {
 	var options = GetDefaultRequestOptions()
 	options.Method = "DELETE"
 	options.Bucket = bucket
-	options.Params["lifecycle"] = "lifecycle"
+	options.Params["lifecycle"] = ""
 	return api.httpRequestWithUnmarshalXML(options, nil)
 }
 
-// DeleteLogging Delete bucket logging
-func (api *API) DeleteLogging(bucket string) error {
+// DeleteBucketLogging Delete bucket logging
+func (api *API) DeleteBucketLogging(bucket string) error {
 	var options = GetDefaultRequestOptions()
 	options.Method = "DELETE"
 	options.Bucket = bucket
-	options.Params["logging"] = "logging"
+	options.Params["logging"] = ""
 	return api.httpRequestWithUnmarshalXML(options, nil)
 }
 
@@ -558,7 +558,7 @@ func (api *API) GetObjectACL(bucket, object string, result *AccessControlPolicy)
 	var options = GetDefaultRequestOptions()
 	options.Bucket = bucket
 	options.Object = object
-	options.Params["acl"] = "acl"
+	options.Params["acl"] = ""
 	return api.httpRequestWithUnmarshalXML(options, result)
 }
 
@@ -615,7 +615,7 @@ func (api *API) PutObjectACL(bucket, object, acl string) error {
 	options.Bucket = bucket
 	options.Object = object
 	options.Headers["x-oss-object-acl"] = acl
-	options.Params["acl"] = "acl"
+	options.Params["acl"] = ""
 	if _, err := api.httpRequest(options); err != nil {
 		return err
 	}
@@ -663,7 +663,7 @@ func (api *API) AppendObject(bucket, object string, position int, body io.Reader
 		options.Headers["Content-MD5"] = getBase64MD5(data)
 		options.Body = bytes.NewBuffer(data)
 	}
-	options.Params["append"] = "append"
+	options.Params["append"] = ""
 	options.Params["postion"] = strconv.Itoa(position)
 	var res *http.Response
 	if res, err = api.httpRequest(options); err != nil {
@@ -696,14 +696,20 @@ func (api *API) DeleteObjects(bucket string, objects []string, result *DeleteRes
 		quiet = true
 	}
 
+	var keys = make([]ObjectKey, len(objects))
+	for idx, object := range objects {
+		keys[idx] = ObjectKey{Key: object}
+	}
+
 	var deleteXML = DeleteXML{
 		Quiet:   quiet,
-		Objects: objects,
+		Objects: keys,
 	}
 
 	var data, _ = xml.Marshal(deleteXML)
+	options.Headers["Content-MD5"] = getBase64MD5(data)
 	options.Body = bytes.NewBuffer(data)
-	options.Params["delete"] = "delete"
+	options.Params["delete"] = ""
 	return api.httpRequestWithUnmarshalXML(options, result)
 }
 
@@ -722,7 +728,7 @@ func (api *API) NewMultipartUpload(bucket, object string, headers map[string]str
 	options.Method = "POST"
 	options.Bucket = bucket
 	options.Object = object
-	options.Params["uploads"] = "uploads"
+	options.Params["uploads"] = ""
 	var result InitiateMultipartUploadResult
 	if err := api.httpRequestWithUnmarshalXML(options, &result); err != nil {
 		return nil, err
@@ -856,7 +862,7 @@ func (api *API) ListMultipartUpload(bucket string, opts *ListMultipartUploadOpti
 	options.Method = "GET"
 	options.Bucket = bucket
 	options.Params = opts.Params
-	options.Params["uploads"] = "uploads"
+	options.Params["uploads"] = ""
 	options.Params["delimiter"] = opts.Delimiter
 	options.Params["max-uploads"] = opts.MaxUploads
 	options.Params["key-marker"] = opts.KeyMarker
@@ -911,7 +917,7 @@ func (api *API) PutBucketCORS(bucket string, config CORSConfiguration) error {
 	options.Bucket = bucket
 	var data, _ = xml.Marshal(config)
 	options.Body = bytes.NewBuffer(data)
-	options.Params["cors"] = "cors"
+	options.Params["cors"] = ""
 	return api.httpRequestWithUnmarshalXML(options, nil)
 }
 
@@ -919,7 +925,7 @@ func (api *API) PutBucketCORS(bucket string, config CORSConfiguration) error {
 func (api *API) GetBucketCORS(bucket string, result *CORSConfiguration) error {
 	var options = GetDefaultRequestOptions()
 	options.Bucket = bucket
-	options.Params["cors"] = "cors"
+	options.Params["cors"] = ""
 	return api.httpRequestWithUnmarshalXML(options, result)
 }
 
@@ -928,7 +934,7 @@ func (api *API) DeleteBucketCORS(bucket string) error {
 	var options = GetDefaultRequestOptions()
 	options.Method = "DELETE"
 	options.Bucket = bucket
-	options.Params["cors"] = "cors"
+	options.Params["cors"] = ""
 	return api.httpRequestWithUnmarshalXML(options, nil)
 }
 
