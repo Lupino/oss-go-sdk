@@ -30,7 +30,7 @@ After account created, you can create the OSS instance and get the `accessKeyId`
 
 ## Initial OSS API
 
-```golang
+```go
 import (
     "github.com/Lupino/oss-go-sdk"
 )
@@ -42,7 +42,7 @@ var OSSAPI = oss.NewAPI(APIOptions)
 
 ## Get Service
 
-```golang
+```go
 var result oss.ListAllMyBucketsResult
 var headers = make(map[string]string)
 var err error
@@ -53,7 +53,7 @@ err = OSSAPI.GetService(&result, headers)
 
 all the error is the error xml so you shoud parse the error and see the error message.
 
-```golang
+```go
 var e = oss.ParseError(err)
 ```
 
