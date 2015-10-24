@@ -106,8 +106,7 @@ type LifecycleRule struct {
 	ID             string
 	Prefix         string
 	Status         string
-	ExpirationDays int       `xml:"Expiration>Days"`
-	ExpirationDate time.Time `xml:"Expiration>Date"`
+	ExpirationDays int `xml:"Expiration>Days"`
 }
 
 // LifecycleConfiguration defined lifecycle configuration
@@ -129,11 +128,17 @@ type CopyObjectResult struct {
 	ETag         string
 }
 
+// ObjectKey defined delete multiple objects object key
+type ObjectKey struct {
+	XMLName xml.Name `xml:"Object"`
+	Key     string
+}
+
 // DeleteXML defined delete multiple objects xml
 type DeleteXML struct {
 	XMLName xml.Name `xml:"Delete"`
 	Quiet   bool
-	Objects []string `xml:"Object>Key"`
+	Objects []ObjectKey `xml:"--"`
 }
 
 // DeleteResult defined delete result
