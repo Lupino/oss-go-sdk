@@ -415,6 +415,7 @@ func (api *API) CreateBucket(bucket string, acl ACLGrant, headers map[string]str
 func (api *API) PutBucket(bucket string, acl ACLGrant, config *CreateBucketConfiguration, headers map[string]string) error {
 	var options = GetDefaultRequestOptions()
 	options.Method = "PUT"
+	options.Bucket = bucket
 	if headers != nil {
 		options.Headers = headers
 	}
@@ -429,8 +430,16 @@ func (api *API) PutBucket(bucket string, acl ACLGrant, config *CreateBucketConfi
 }
 
 // PutBucketACL create bucket with acl or update bucket acl when bucket is exists
-func (api *API) PutBucketACL(bucket, acl string, headers map[string]string) error {
-	return api.PutBucket(bucket, acl, nil, headers)
+func (api *API) PutBucketACL(bucket string, acl ACLGrant, headers map[string]string) error {
+	var options = GetDefaultRequestOptions()
+	options.Method = "PUT"
+	options.Bucket = bucket
+	if headers != nil {
+		options.Headers = headers
+	}
+	options.Params["acl"] = ""
+	options.Headers["x-oss-acl"] = string(acl)
+	return api.httpRequestWithUnmarshalXML(options, nil)
 }
 
 // PutBucketLogging Put bucket logging
