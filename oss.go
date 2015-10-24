@@ -736,7 +736,7 @@ func (api *API) NewMultipartUpload(bucket, object string, headers map[string]str
 	options.Object = object
 	options.Params["uploads"] = "uploads"
 	var result InitiateMultipartUploadResult
-	if err := api.httpRequestWithUnmarshalXML(options, result); err != nil {
+	if err := api.httpRequestWithUnmarshalXML(options, &result); err != nil {
 		return nil, err
 	}
 	var multi = new(MultipartUpload)

@@ -321,3 +321,67 @@ func TestObjectAPI(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestMultipartUploadAPI(t *testing.T) {
+	var bucket = "bucket"
+	var object = "object"
+	var uploadID = "uploadID"
+	var contentType = "plan/text"
+	var headers = make(map[string]string)
+	headers["Content-Type"] = contentType
+	var err error
+	var multi *MultipartUpload
+	multi, err = api.GetMultiPartUpload(bucket, object, uploadID)
+	if multi, err = api.NewMultipartUpload(bucket, object, headers); err != nil {
+		t.Fatal(err)
+	}
+
+	var body = bytes.NewBufferString("this is the body")
+	var etag = "etag"
+	if etag, err = multi.UploadPart(1, body); err != nil {
+		t.Fatal(err)
+	}
+	fp, err := os.Open("oss.go")
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("ETag: %s\n", etag)
+	if etag, err = multi.UploadPart(2, fp); err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("ETag: %s\n", etag)
+
+	if etag, err = multi.CopyPart("bucket1", "object1", 4, "bytes=0-10", headers); err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("ETag: %s\n", etag)
+
+	if err = multi.AbortUpload(); err != nil {
+		t.Fatal(err)
+	}
+	var result CompleteMultipartUploadResult
+	var parts = []Part{
+		Part{
+			PartNumber: 1,
+			ETag:       "ETag",
+		},
+		Part{
+			PartNumber: 2,
+			ETag:       "ETag",
+		},
+	}
+	if err = multi.CompleteUpload(parts, &result); err != nil {
+		t.Fatal(err)
+	}
+
+	var result2 ListPartsResult
+	if err = multi.ListParts(1000, 3, &result2); err != nil {
+		t.Fatal(err)
+	}
+
+	var opts = GetDefaultListMultipartUploadOptions()
+	if _, err = api.ListMultipartUpload(bucket, opts); err != nil {
+		t.Fatal(err)
+	}
+
+}

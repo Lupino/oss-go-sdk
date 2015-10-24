@@ -143,6 +143,39 @@ func handle() *http.ServeMux {
 			return
 		}
 
+		if _, ok := query["uploads"]; ok {
+			fmt.Fprintf(w, `
+            <?xml version="1.0" encoding="UTF-8"?>
+<ListMultipartUploadsResult xmlns="http://doc.oss-cn-hangzhou.aliyuncs.com">
+    <Bucket>oss-example</Bucket>
+    <KeyMarker></KeyMarker>
+    <UploadIdMarker></UploadIdMarker>
+    <NextKeyMarker>oss.avi</NextKeyMarker>
+    <NextUploadIdMarker>0004B99B8E707874FC2D692FA5D77D3F</NextUploadIdMarker>
+    <Delimiter></Delimiter>
+    <Prefix></Prefix>
+    <MaxUploads>1000</MaxUploads>
+    <IsTruncated>false</IsTruncated>
+    <Upload>
+        <Key>multipart.data</Key>
+        <UploadId>0004B999EF518A1FE585B0C9360DC4C8</UploadId>
+        <Initiated>2012-02-23T04:18:23.000Z</Initiated>
+    </Upload>
+    <Upload>
+        <Key>multipart.data</Key>
+        <UploadId>0004B999EF5A239BB9138C6227D69F95</UploadId>
+        <Initiated>2012-02-23T04:18:23.000Z</Initiated>
+    </Upload>
+    <Upload>
+        <Key>oss.avi</Key>
+        <UploadId>0004B99B8E707874FC2D692FA5D77D3F</UploadId>
+        <Initiated>2012-02-23T06:14:27.000Z</Initiated>
+    </Upload>
+</ListMultipartUploadsResult>
+            `)
+			return
+		}
+
 		fmt.Fprintf(w, `
 <?xml version="1.0" encoding="UTF-8"?>
 <ListBucketResult xmlns="http://doc.oss-cn-hangzhou.aliyuncs.com">
@@ -210,6 +243,38 @@ func handle() *http.ServeMux {
                 `)
 				return
 			}
+			if _, ok := query["uploadId"]; ok {
+				fmt.Fprintf(w, `
+                <?xml version="1.0" encoding="UTF-8"?>
+<ListPartsResult xmlns="http://doc.oss-cn-hangzhou.aliyuncs.com">
+    <Bucket>multipart_upload</Bucket>
+    <Key>multipart.data</Key>
+    <UploadId>0004B999EF5A239BB9138C6227D69F95</UploadId>
+    <NextPartNumberMarker>5</NextPartNumberMarker>
+    <MaxParts>1000</MaxParts>
+    <IsTruncated>false</IsTruncated>
+    <Part>
+        <PartNumber>1</PartNumber>
+        <LastModified>2012-02-23T07:01:34.000Z</LastModified>
+        <ETag>&quot;3349DC700140D7F86A078484278075A9&quot;</ETag>
+        <Size>6291456</Size>
+    </Part>
+    <Part>
+        <PartNumber>2</PartNumber>
+        <LastModified>2012-02-23T07:01:12.000Z</LastModified>
+        <ETag>&quot;3349DC700140D7F86A078484278075A9&quot;</ETag>
+        <Size>6291456</Size>
+    </Part>
+    <Part>
+        <PartNumber>5</PartNumber>
+        <LastModified>2012-02-23T07:02:03.000Z</LastModified>
+        <ETag>&quot;7265F4D211B56873A381D321F586E4A9&quot;</ETag>
+        <Size>1024</Size>
+    </Part>
+</ListPartsResult>
+                `)
+				return
+			}
 			fmt.Fprintf(w, `this is the object body`)
 			return
 		}
@@ -217,6 +282,16 @@ func handle() *http.ServeMux {
 			var headers = req.Header
 			if source, ok := headers["X-Oss-Copy-Source"]; ok {
 				fmt.Printf("x-oss-copy-source: %s\n", source)
+				if _, ok := query["uploadId"]; ok {
+					fmt.Fprintf(w, `
+                    <?xml version="1.0" encoding="UTF-8"?>
+<CopyPartResult xmlns="http://doc.oss-cn-hangzhou.aliyuncs.com">
+    <LastModified>2014-07-17T06:27:54.000Z </LastModified>
+    <ETag>"5B3C1A2E053D763E1B002CC607C5A0FE"</ETag>
+</CopyPartResult>
+                    `)
+					return
+				}
 				fmt.Fprintf(w, `
                 <?xml version="1.0" encoding="UTF-8"?>
 <CopyObjectResult xmlns="http://doc.oss-cn-hangzhou.aliyuncs.com">
@@ -228,6 +303,31 @@ func handle() *http.ServeMux {
 			}
 			var buf, _ = ioutil.ReadAll(req.Body)
 			fmt.Printf("object length is: %d\n", len(buf))
+		}
+		if method == "POST" {
+			if _, ok := query["uploadId"]; ok {
+				fmt.Fprintf(w, `
+                <?xml version="1.0" encoding="UTF-8"?>
+<CompleteMultipartUploadResult xmlns="http://doc.oss-cn-hangzhou.aliyuncs.com">
+    <Location>http://oss-example.oss-cn-hangzhou.aliyuncs.com /multipart.data</Location>
+    <Bucket>oss-example</Bucket>
+    <Key>multipart.data</Key>
+    <ETag>B864DB6A936D376F9F8D3ED3BBE540DD-3</ETag>
+</CompleteMultipartUploadResult>
+                `)
+				return
+			}
+			fmt.Fprintf(w, `
+<?xml version="1.0" encoding="UTF-8"?>
+<InitiateMultipartUploadResult xmlns="http://doc.oss-cn-hangzhou.aliyuncs.com">
+    <Bucket>bucket</Bucket>
+    <Key>object</Key>
+    <UploadId>0004B9894A22E5B1888A1E29F8236E2D</UploadId>
+</InitiateMultipartUploadResult>
+            `)
+			if _, ok := query["uploads"]; ok {
+				return
+			}
 		}
 		fmt.Fprintf(w, "success")
 	})
