@@ -615,6 +615,11 @@ func (api *API) PutObject(bucket, object string, body io.Reader, headers map[str
 	return nil
 }
 
+// PostObject is same to PutObject, but use POST method, so just alisa to PutObject
+func (api *API) PostObject(bucket, object string, body io.Reader, headers map[string]string) error {
+	return api.PutObject(bucket, object, body, headers)
+}
+
 // PutObjectACL defined put object acl
 func (api *API) PutObjectACL(bucket, object, acl string) error {
 	var options = GetDefaultRequestOptions()

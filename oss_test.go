@@ -272,7 +272,7 @@ func TestObjectAPI(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err = api.PutObject(bucket, object, fp, headers); err != nil {
+	if err = api.PostObject(bucket, object, fp, headers); err != nil {
 		t.Fatal(err)
 	}
 
