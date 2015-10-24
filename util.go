@@ -23,6 +23,18 @@ const PROVIDER = "OSS"
 // SelfDefineHeaderPrefix defined oss header prefix
 const SelfDefineHeaderPrefix = "x-oss-"
 
+// ACLGrant defined AccessControlPolicy grant type
+type ACLGrant string
+
+const (
+	// ACLPublicReadWrite defined public read write AccessControlPolicy
+	ACLPublicReadWrite ACLGrant = "public-read-write"
+	// ACLPublicRead defined public read AccessControlPolicy
+	ACLPublicRead ACLGrant = "public-read"
+	// ACLPrivate defined private AccessControlPolicy
+	ACLPrivate ACLGrant = "private"
+)
+
 // OSSHostList defined OSS host list
 var OSSHostList = []string{"aliyun-inc.com", "aliyuncs.com", "alibaba.net", "s3.amazonaws.com"}
 

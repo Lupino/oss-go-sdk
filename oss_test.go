@@ -156,7 +156,7 @@ func TestCreateBucket(t *testing.T) {
 	var config = CreateBucketConfiguration{
 		LocationConstraint: "oss-cn-hangzhou",
 	}
-	if err = api.PutBucket("bucket", "", &config, nil); err != nil {
+	if err = api.PutBucket("bucket", ACLPublicReadWrite, &config, nil); err != nil {
 		t.Fatal(err)
 	}
 

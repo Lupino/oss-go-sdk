@@ -399,7 +399,7 @@ func (api *API) GetBucketLogging(bucket string, result *BucketLoggingStatus) err
 }
 
 // CreateBucket defined create bucket
-func (api *API) CreateBucket(bucket, acl string, headers map[string]string) error {
+func (api *API) CreateBucket(bucket string, acl ACLGrant, headers map[string]string) error {
 	return api.PutBucket(bucket, acl, nil, headers)
 }
 
@@ -408,19 +408,19 @@ func (api *API) CreateBucket(bucket, acl string, headers map[string]string) erro
 // :type bucket: string
 // :param
 //
-// :type acl: string
+// :type acl: ACLGrant
 // :param: one of private public-read public-read-write
 //
 // :type headers: map[string]string
 // :param: HTTP header
-func (api *API) PutBucket(bucket, acl string, config *CreateBucketConfiguration, headers map[string]string) error {
+func (api *API) PutBucket(bucket string, acl ACLGrant, config *CreateBucketConfiguration, headers map[string]string) error {
 	var options = GetDefaultRequestOptions()
 	options.Method = "PUT"
 	if headers != nil {
 		options.Headers = headers
 	}
 	if acl != "" {
-		options.Headers["x-oss-acl"] = acl
+		options.Headers["x-oss-acl"] = string(acl)
 	}
 	if config != nil {
 		var data, _ = xml.Marshal(config)
