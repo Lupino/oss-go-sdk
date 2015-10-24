@@ -206,7 +206,7 @@ type ListMultipartUploadsResult struct {
 	Prefix             string
 	MaxUploads         string
 	IsTruncated        bool
-	Uploads            []Upload
+	Uploads            []Upload `xml:"Upload"`
 }
 
 // ListPartsResult defined list parts result
