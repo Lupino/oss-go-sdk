@@ -123,7 +123,7 @@ func GetDefaultSignURLOptions() *SignURLOptions {
 // Returns:
 //     signature url.
 func (api *API) SignURLAuthWithExpireTime(options *SignURLOptions) string {
-	var sendTime = time.Now().Add(options.Timeout).Format("Wed, 21 Oct 2015 07:17:58 GMT")
+	var sendTime = time.Now().Add(options.Timeout).UTC().Format("Mon, 02 Oct 2006 03:04:05 GMT")
 	options.Headers["Date"] = sendTime
 	var authValue = getAssign(api.secretAccessKey, options.Method, options.Headers,
 		options.Resource, nil, api.debug)
@@ -139,7 +139,7 @@ func (api *API) SignURLAuthWithExpireTime(options *SignURLOptions) string {
 // Returns:
 //     signature url.
 func (api *API) SignURL(options *SignURLOptions) string {
-	var sendTime = time.Now().Add(options.Timeout).Format("Wed, 21 Oct 2015 07:17:58 GMT")
+	var sendTime = time.Now().Add(options.Timeout).UTC().Format("Mon, 02 Oct 2006 03:04:05 GMT")
 	options.Headers["Date"] = sendTime
 	var resource = fmt.Sprintf("/%s/%s%s", options.Bucket, options.Object, getResource(options.Params))
 	var authValue = getAssign(api.secretAccessKey, options.Method, options.Headers, resource, nil, api.debug)
