@@ -604,11 +604,8 @@ func (api *API) PutObject(bucket, object string, body io.Reader, headers map[str
 	}
 
 	var err error
-	if _, err = api.httpRequest(options); err != nil {
-		return err
-	}
-
-	return nil
+	_, err = api.httpRequest(options)
+	return err
 }
 
 // PostObject is same to PutObject, but use POST method, so just alisa to PutObject
@@ -624,11 +621,8 @@ func (api *API) PutObjectACL(bucket, object, acl string) error {
 	options.Object = object
 	options.Headers["x-oss-object-acl"] = acl
 	options.Params["acl"] = ""
-	if _, err := api.httpRequest(options); err != nil {
-		return err
-	}
-
-	return nil
+	_, err := api.httpRequest(options)
+	return err
 }
 
 // CopyObject defined copy object
@@ -643,10 +637,7 @@ func (api *API) CopyObject(sourceBucket, sourceObject, targetBucket, targetObjec
 	}
 
 	options.Headers["x-oss-copy-source"] = fmt.Sprintf("/%s/%s", sourceBucket, quote(sourceObject))
-	if err = api.httpRequestWithUnmarshalXML(options, &result); err != nil {
-		return
-	}
-
+	err = api.httpRequestWithUnmarshalXML(options, &result)
 	return
 }
 
@@ -828,10 +819,7 @@ func (multi *MultipartUpload) CompleteUpload(parts []Part, result *CompleteMulti
 	}
 	var data, _ = xml.Marshal(partXML)
 	options.Body = bytes.NewBuffer(data)
-	if err := multi.api.httpRequestWithUnmarshalXML(options, &result); err != nil {
-		return err
-	}
-	return nil
+	return multi.api.httpRequestWithUnmarshalXML(options, &result)
 }
 
 // AbortUpload defined abort multipart upload
@@ -841,10 +829,8 @@ func (multi *MultipartUpload) AbortUpload() error {
 	options.Bucket = multi.Bucket
 	options.Object = multi.Key
 	options.Params["uploadId"] = multi.UploadID
-	if _, err := multi.api.httpRequest(options); err != nil {
-		return err
-	}
-	return nil
+	_, err := multi.api.httpRequest(options)
+	return err
 }
 
 // ListMultipartUploadOptions defined list multipart upload options
@@ -914,11 +900,7 @@ func (multi *MultipartUpload) ListParts(maxParts, partNumberMarker int,
 	options.Bucket = multi.Bucket
 	options.Object = multi.Key
 	options.Params["uploadId"] = multi.UploadID
-	if err := multi.api.httpRequestWithUnmarshalXML(options, &result); err != nil {
-		return err
-	}
-	return nil
-
+	return multi.api.httpRequestWithUnmarshalXML(options, &result)
 }
 
 // PutBucketCORS defined put bucket cors
