@@ -780,7 +780,7 @@ func (multi *MultipartUpload) UploadPart(partNumber int, body io.Reader) (string
 
 	var res *http.Response
 	var err error
-	if res, err = api.httpRequest(options); err != nil {
+	if res, err = multi.api.httpRequest(options); err != nil {
 		return "", err
 	}
 	return res.Header.Get("ETag"), nil
@@ -807,7 +807,7 @@ func (multi *MultipartUpload) CopyPart(sourceBucket, sourceObject string, partNu
 
 	var result CopyPartResult
 	var err error
-	if err = api.httpRequestWithUnmarshalXML(options, &result); err != nil {
+	if err = multi.api.httpRequestWithUnmarshalXML(options, &result); err != nil {
 		return "", err
 	}
 	return result.ETag, nil
