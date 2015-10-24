@@ -385,3 +385,44 @@ func TestMultipartUploadAPI(t *testing.T) {
 	}
 
 }
+
+func TestBucketCORSAPI(t *testing.T) {
+	var bucket = "bucket"
+	var object = "object"
+	var rules = []CORSRule{
+		CORSRule{
+			AllowedOrigin: []string{"*"},
+			AllowedMethod: []string{"GET", "POST"},
+			AllowedHeader: []string{"Authorization"},
+			ExposeHeader:  []string{"x-oss-test"},
+			MaxAgeSeconds: 100,
+		},
+		CORSRule{
+			AllowedOrigin: []string{"*"},
+			AllowedMethod: []string{"GET", "POST"},
+			AllowedHeader: []string{"Authorization"},
+			ExposeHeader:  []string{"x-oss-test"},
+			MaxAgeSeconds: 100,
+		},
+	}
+	var config = CORSConfiguration{
+		Rules: rules,
+	}
+
+	var err error
+	if err = api.PutBucketCORS(bucket, config); err != nil {
+		t.Fatal(err)
+	}
+
+	if err = api.GetBucketCORS(bucket, &config); err != nil {
+		t.Fatal(err)
+	}
+
+	if err = api.DeleteBucketCORS(bucket); err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err = api.OptionObject(bucket, object, nil); err != nil {
+		t.Fatal(err)
+	}
+}

@@ -915,3 +915,46 @@ func (multi *MultipartUpload) ListParts(maxParts, partNumberMarker int,
 	return nil
 
 }
+
+// PutBucketCORS defined put bucket cors
+func (api *API) PutBucketCORS(bucket string, config CORSConfiguration) error {
+	var options = GetDefaultRequestOptions()
+	options.Method = "PUT"
+	options.Bucket = bucket
+	var data, _ = xml.Marshal(config)
+	options.Body = bytes.NewBuffer(data)
+	options.Params["cors"] = "cors"
+	return api.httpRequestWithUnmarshalXML(options, nil)
+}
+
+// GetBucketCORS Get bucket cors
+func (api *API) GetBucketCORS(bucket string, result *CORSConfiguration) error {
+	var options = GetDefaultRequestOptions()
+	options.Bucket = bucket
+	options.Params["cors"] = "cors"
+	return api.httpRequestWithUnmarshalXML(options, result)
+}
+
+// DeleteBucketCORS Delete bucket cors
+func (api *API) DeleteBucketCORS(bucket string) error {
+	var options = GetDefaultRequestOptions()
+	options.Method = "DELETE"
+	options.Bucket = bucket
+	options.Params["cors"] = "cors"
+	return api.httpRequestWithUnmarshalXML(options, nil)
+}
+
+// OptionObject defined option object
+func (api *API) OptionObject(bucket, object string, headers map[string]string) (http.Header, error) {
+	var options = GetDefaultRequestOptions()
+	options.Method = "DELETE"
+	options.Bucket = bucket
+	options.Object = object
+	options.Headers = headers
+	var err error
+	var res *http.Response
+	if res, err = api.httpRequest(options); err != nil {
+		return nil, err
+	}
+	return res.Header, nil
+}

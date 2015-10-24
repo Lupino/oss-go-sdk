@@ -215,3 +215,19 @@ type ListPartsResult struct {
 	IsTruncated          bool
 	Parts                []Part
 }
+
+// CORSRule defined cors rule
+type CORSRule struct {
+	XMLName       xml.Name `xml:"CORSRule"`
+	AllowedOrigin []string
+	AllowedMethod []string
+	AllowedHeader []string
+	ExposeHeader  []string
+	MaxAgeSeconds int
+}
+
+// CORSConfiguration defined cors configuration
+type CORSConfiguration struct {
+	XMLName xml.Name `xml:"CORSConfiguration"`
+	Rules   []CORSRule
+}

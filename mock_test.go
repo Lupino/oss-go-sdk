@@ -175,6 +175,21 @@ func handle() *http.ServeMux {
             `)
 			return
 		}
+		if _, ok := query["cors"]; ok {
+			fmt.Fprintf(w, `
+<?xml version="1.0" encoding="UTF-8"?>
+<CORSConfiguration>
+    <CORSRule>
+      <AllowedOrigin>*</AllowedOrigin>
+      <AllowedMethod>GET</AllowedMethod>
+      <AllowedHeader>*</AllowedHeader>
+      <ExposeHeader>x-oss-test</ExposeHeader>
+      <MaxAgeSeconds>100</MaxAgeSeconds>
+    </CORSRule>
+</CORSConfiguration>
+            `)
+			return
+		}
 
 		fmt.Fprintf(w, `
 <?xml version="1.0" encoding="UTF-8"?>
