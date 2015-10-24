@@ -265,7 +265,6 @@ func (api *API) httpRequest(options *RequestOptions) (res *http.Response, err er
 			host = api.host
 		}
 
-		fmt.Printf("%s %s%s%s %s\n", options.Method, schema, host, url, options.Headers["Host"])
 		if req, err = http.NewRequest(options.Method, schema+host+url, options.Body); err != nil {
 			continue
 		}
