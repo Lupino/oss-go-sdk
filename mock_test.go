@@ -2,6 +2,7 @@ package oss
 
 import (
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 )
@@ -34,6 +35,25 @@ func handle() *http.ServeMux {
 	mux.HandleFunc("/bucket/", func(w http.ResponseWriter, req *http.Request) {
 		var query = req.URL.Query()
 		var method = req.Method
+		if method == "POST" {
+			if _, ok := query["delete"]; ok {
+				fmt.Fprintf(w, `
+<?xml version="1.0" encoding="UTF-8"?>
+<DeleteResult xmlns="http://doc.oss-cn-hangzhou.aliyuncs.com">
+    <Deleted>
+       <Key>multipart.data</Key>
+    </Deleted>
+    <Deleted>
+       <Key>test.jpg</Key>
+    </Deleted>
+    <Deleted>
+       <Key>demo.jpg</Key>
+    </Deleted>
+</DeleteResult>
+                `)
+				return
+			}
+		}
 		if method != "GET" {
 			fmt.Fprintf(w, "success")
 			return
@@ -170,6 +190,46 @@ func handle() *http.ServeMux {
     </Contents>
 </ListBucketResult>
         `)
+	})
+	mux.HandleFunc("/bucket/object", func(w http.ResponseWriter, req *http.Request) {
+		var query = req.URL.Query()
+		var method = req.Method
+		if method == "GET" {
+			if _, ok := query["acl"]; ok {
+				fmt.Fprintf(w, `
+<?xml version="1.0" ?>
+<AccessControlPolicy>
+    <Owner>
+        <ID>00220120222</ID>
+        <DisplayName>00220120222</DisplayName>
+    </Owner>
+    <AccessControlList>
+        <Grant>public-read </Grant>
+    </AccessControlList>
+</AccessControlPolicy>
+                `)
+				return
+			}
+			fmt.Fprintf(w, `this is the object body`)
+			return
+		}
+		if method == "PUT" {
+			var headers = req.Header
+			if source, ok := headers["X-Oss-Copy-Source"]; ok {
+				fmt.Printf("x-oss-copy-source: %s\n", source)
+				fmt.Fprintf(w, `
+                <?xml version="1.0" encoding="UTF-8"?>
+<CopyObjectResult xmlns="http://doc.oss-cn-hangzhou.aliyuncs.com">
+    <LastModified>2014-05-15T11:18:32.000Z</LastModified>
+    <ETag>"5B3C1A2E053D763E1B002CC607C5A0FE"</ETag>
+</CopyObjectResult>
+                `)
+				return
+			}
+			var buf, _ = ioutil.ReadAll(req.Body)
+			fmt.Printf("object length is: %d\n", len(buf))
+		}
+		fmt.Fprintf(w, "success")
 	})
 	return mux
 }

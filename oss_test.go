@@ -1,10 +1,15 @@
 package oss
 
 import (
+	"bufio"
+	"bytes"
 	"fmt"
+	"io"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"os"
 	"testing"
 )
 
@@ -250,4 +255,69 @@ func TestSignURLAuthWithExpireTime(t *testing.T) {
 	var options = GetDefaultSignURLOptions()
 	var signURL = api.SignURLAuthWithExpireTime(options)
 	fmt.Printf("SignURL: %s\n", signURL)
+}
+
+func TestObjectAPI(t *testing.T) {
+	var bucket = "bucket"
+	var object = "object"
+	var body = bytes.NewBufferString("this is the body")
+	var contentType = "plan/text"
+	var headers = make(map[string]string)
+	headers["Content-Type"] = contentType
+	var err error
+	if err = api.PutObject(bucket, object, bufio.NewReader(body), headers); err != nil {
+		t.Fatal(err)
+	}
+	fp, err := os.Open("oss.go")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = api.PutObject(bucket, object, fp, headers); err != nil {
+		t.Fatal(err)
+	}
+
+	var data io.Reader
+	if data, err = api.GetObject(bucket, object, nil, nil); err != nil {
+		t.Fatal(err)
+	}
+	var buf, _ = ioutil.ReadAll(data)
+	fmt.Printf("%s\n", buf)
+
+	var acl AccessControlPolicy
+	if err = api.GetObjectACL(bucket, object, &acl); err != nil {
+		t.Fatal(err)
+	}
+
+	if err = api.PutObjectACL(bucket, object, "public-read"); err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err = api.HeadObject(bucket, object, nil); err != nil {
+		t.Fatal(err)
+	}
+
+	if err = api.DeleteObject(bucket, object); err != nil {
+		t.Fatal(err)
+	}
+
+	var deleteResult DeleteResult
+
+	if err = api.DeleteObjects(bucket, []string{"object1", "object2"}, &deleteResult); err != nil {
+		t.Fatal(err)
+	}
+
+	body = bytes.NewBufferString("this is the body")
+	if _, err = api.AppendObject(bucket, object, 0, bufio.NewReader(body), headers); err != nil {
+		t.Fatal(err)
+	}
+	fp, err = os.Open("oss.go")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err = api.AppendObject(bucket, object, 0, fp, headers); err != nil {
+		t.Fatal(err)
+	}
+	if _, err = api.CopyObject(bucket, object, "bucket", "object", headers); err != nil {
+		t.Fatal(err)
+	}
 }
