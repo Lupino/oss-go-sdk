@@ -217,8 +217,8 @@ func TestDeleteBucketWebsite(t *testing.T) {
 	}
 }
 
-func TestDeleteLogging(t *testing.T) {
-	if err := api.DeleteLogging("bucket"); err != nil {
+func TestDeleteBucketLogging(t *testing.T) {
+	if err := api.DeleteBucketLogging("bucket"); err != nil {
 		t.Fatal(err)
 	}
 }
