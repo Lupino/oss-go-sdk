@@ -304,6 +304,10 @@ func TestObjectAPI(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	if err = api.DeleteObjects(bucket, []string{"object1", "object2"}, nil); err != nil {
+		t.Fatal(err)
+	}
+
 	body = bytes.NewBufferString("this is the body")
 	if _, err = api.AppendObject(bucket, object, 0, bufio.NewReader(body), headers); err != nil {
 		t.Fatal(err)

@@ -718,7 +718,10 @@ func (api *API) DeleteObjects(bucket string, objects []string, result *DeleteRes
 	options.Headers["Content-MD5"] = getBase64MD5(data)
 	options.Body = bytes.NewBuffer(data)
 	options.Params["delete"] = ""
-	return api.httpRequestWithUnmarshalXML(options, result)
+	if result != nil {
+		return api.httpRequestWithUnmarshalXML(options, result)
+	}
+	return api.httpRequestWithUnmarshalXML(options, nil)
 }
 
 // MultipartUpload defined multipart upload struct
