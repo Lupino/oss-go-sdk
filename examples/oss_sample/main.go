@@ -1,7 +1,7 @@
 package main
 
 import (
-    "github.com/Lupino/oss-go-api"
+    "github.com/Lupino/oss-go-sdk"
     "log"
     "bytes"
     "bufio"
