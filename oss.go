@@ -256,7 +256,7 @@ func (api *API) httpRequest(options *RequestOptions) (res *http.Response, err er
 		}
 
 		url = appendParam(url, options.Params)
-		options.Headers["Date"] = time.Now().Format("Wed, 21 Oct 2015 07:17:58 GMT")
+		options.Headers["Date"] = time.Now().UTC().Format("Mon, 02 Oct 2006 03:04:05 GMT")
 		options.Headers["Authorization"] = api.createSignForNormalAuth(options.Method, options.Headers, resource)
 		options.Headers["User-Agent"] = api.agent
 		if checkBucketValid(options.Bucket) && !isIP(api.host) {
