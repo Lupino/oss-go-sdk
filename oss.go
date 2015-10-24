@@ -588,7 +588,7 @@ func (api *API) HeadObject(bucket, object string, headers map[string]string) (re
 }
 
 // PutObject defined put object
-func (api *API) PutObject(bucket, object string, body io.ReadSeeker, headers map[string]string) error {
+func (api *API) PutObject(bucket, object string, body io.Reader, headers map[string]string) error {
 	var options = GetDefaultRequestOptions()
 	options.Method = "PUT"
 	options.Bucket = bucket
@@ -597,9 +597,16 @@ func (api *API) PutObject(bucket, object string, body io.ReadSeeker, headers map
 		options.Headers = headers
 	}
 
-	options.Headers["Content-MD5"] = getBase64MD5WithReader(body)
-	body.Seek(0, 0)
-	options.Body = body
+	if bodySeeker, ok := body.(io.ReadSeeker); ok {
+		options.Headers["Content-MD5"] = getBase64MD5WithReader(bodySeeker)
+		bodySeeker.Seek(0, 0)
+		options.Body = bodySeeker
+	} else {
+		var data, _ = ioutil.ReadAll(body)
+		options.Headers["Content-MD5"] = getBase64MD5(data)
+		options.Body = bytes.NewBuffer(data)
+	}
+
 	var err error
 	if _, err = api.httpRequest(options); err != nil {
 		return err
@@ -643,7 +650,7 @@ func (api *API) CopyObject(sourceBucket, sourceObject, targetBucket, targetObjec
 }
 
 // AppendObject defined append object
-func (api *API) AppendObject(bucket, object string, position int, body io.ReadSeeker,
+func (api *API) AppendObject(bucket, object string, position int, body io.Reader,
 	headers map[string]string) (result http.Header, err error) {
 
 	var options = GetDefaultRequestOptions()
@@ -654,9 +661,15 @@ func (api *API) AppendObject(bucket, object string, position int, body io.ReadSe
 		options.Headers = headers
 	}
 
-	options.Headers["Content-MD5"] = getBase64MD5WithReader(body)
-	body.Seek(0, 0)
-	options.Body = body
+	if bodySeeker, ok := body.(io.ReadSeeker); ok {
+		options.Headers["Content-MD5"] = getBase64MD5WithReader(bodySeeker)
+		bodySeeker.Seek(0, 0)
+		options.Body = bodySeeker
+	} else {
+		var data, _ = ioutil.ReadAll(body)
+		options.Headers["Content-MD5"] = getBase64MD5(data)
+		options.Body = bytes.NewBuffer(data)
+	}
 	options.Params["append"] = "append"
 	options.Params["postion"] = strconv.Itoa(position)
 	var res *http.Response
