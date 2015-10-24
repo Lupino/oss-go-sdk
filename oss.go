@@ -949,7 +949,7 @@ func (api *API) DeleteBucketCORS(bucket string) error {
 // OptionObject defined option object
 func (api *API) OptionObject(bucket, object string, headers map[string]string) (http.Header, error) {
 	var options = GetDefaultRequestOptions()
-	options.Method = "DELETE"
+	options.Method = "OPTIONS"
 	options.Bucket = bucket
 	options.Object = object
 	options.Headers = headers
