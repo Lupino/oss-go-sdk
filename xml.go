@@ -37,7 +37,7 @@ type Content struct {
 	XMLName      xml.Name `xml:"Contents"`
 	Key          string
 	LastModified time.Time
-	Etag         string
+	ETag         string
 	Type         string
 	Size         int
 	StorageClass string
@@ -140,4 +140,78 @@ type DeleteXML struct {
 type DeleteResult struct {
 	XMLName xml.Name `xml:"DeleteResult"`
 	Objects []string `xml:"Deleted>Key"`
+}
+
+// InitiateMultipartUploadResult defined initiate multipart upload result
+type InitiateMultipartUploadResult struct {
+	XMLName  xml.Name `xml:"InitiateMultipartUploadResult"`
+	Bucket   string
+	Key      string
+	UploadID string `xml:"UploadId"`
+}
+
+// CopyPartResult defined copy part result
+type CopyPartResult struct {
+	XMLName      xml.Name `xml:"CopyPartResult"`
+	LastModified string
+	ETag         string
+}
+
+// Part defined part xml
+type Part struct {
+	XMLName      xml.Name `xml:"Part"`
+	PartNumber   int
+	ETag         string
+	LastModified time.Time
+	Size         int
+}
+
+// CompleteMultipartUpload defined complete multipart upload xml
+type CompleteMultipartUpload struct {
+	XMLName xml.Name `xml:"CompleteMultipartUpload"`
+	Parts   []Part
+}
+
+// CompleteMultipartUploadResult defined complete multipart upload result xml
+type CompleteMultipartUploadResult struct {
+	XMLName  xml.Name `xml:"CompleteMultipartUploadResult"`
+	Location string
+	Bucket   string
+	Key      string
+	ETag     string
+}
+
+// Upload defined upload xml
+type Upload struct {
+	XMLName   xml.Name `xml:"Upload"`
+	Key       string
+	UploadID  string `xml:"UploadId"`
+	Initiated time.Time
+}
+
+// ListMultipartUploadsResult defined list multipart uploads result
+type ListMultipartUploadsResult struct {
+	XMLName            xml.Name `xml:"ListMultipartUploadsResult"`
+	Bucket             string
+	KeyMarker          string
+	UploadIDMarker     string `xml:"UploadIdMarker"`
+	NextKeyMarker      string
+	NextUploadIDMarker string `xml:"NextUploadIdMarker"`
+	Delimiter          string
+	Prefix             string
+	MaxUploads         string
+	IsTruncated        bool
+	Uploads            []Upload
+}
+
+// ListPartsResult defined list parts result
+type ListPartsResult struct {
+	XMLName              xml.Name `xml:"ListPartsResult"`
+	Bucket               string
+	Key                  string
+	UploadID             string `xml:"UploadId"`
+	NextPartNumberMarker int
+	MaxParts             int
+	IsTruncated          bool
+	Parts                []Part
 }

@@ -718,3 +718,200 @@ func (api *API) DeleteObjects(bucket string, objects []string, result *DeleteRes
 	options.Params["delete"] = "delete"
 	return api.httpRequestWithUnmarshalXML(options, result)
 }
+
+// MultipartUpload defined multipart upload struct
+type MultipartUpload struct {
+	api       *API
+	Bucket    string
+	Key       string
+	UploadID  string
+	Initiated time.Time
+}
+
+// NewMultipartUpload defined initial multipart upload
+func (api *API) NewMultipartUpload(bucket, object string, headers map[string]string) (*MultipartUpload, error) {
+	var options = GetDefaultRequestOptions()
+	options.Method = "POST"
+	options.Bucket = bucket
+	options.Object = object
+	options.Params["uploads"] = "uploads"
+	var result InitiateMultipartUploadResult
+	if err := api.httpRequestWithUnmarshalXML(options, result); err != nil {
+		return nil, err
+	}
+	var multi = new(MultipartUpload)
+	multi.Bucket = result.Bucket
+	multi.Key = result.Key
+	multi.UploadID = result.UploadID
+	multi.api = api
+	return multi, nil
+}
+
+// GetMultiPartUpload defined get multipart upload
+func (api *API) GetMultiPartUpload(bucket, object, uploadID string) (*MultipartUpload, error) {
+	var multi = new(MultipartUpload)
+	multi.Bucket = bucket
+	multi.Key = object
+	multi.UploadID = uploadID
+	multi.api = api
+	return multi, nil
+}
+
+// UploadPart defined upload part
+func (multi *MultipartUpload) UploadPart(partNumber int, body io.Reader) (string, error) {
+	var options = GetDefaultRequestOptions()
+	options.Method = "PUT"
+	options.Bucket = multi.Bucket
+	options.Object = multi.Key
+	options.Params["partNumber"] = strconv.Itoa(partNumber)
+	options.Params["uploadId"] = multi.UploadID
+
+	if bodySeeker, ok := body.(io.ReadSeeker); ok {
+		options.Headers["Content-MD5"] = getBase64MD5WithReader(bodySeeker)
+		bodySeeker.Seek(0, 0)
+		options.Body = bodySeeker
+	} else {
+		var data, _ = ioutil.ReadAll(body)
+		options.Headers["Content-MD5"] = getBase64MD5(data)
+		options.Body = bytes.NewBuffer(data)
+	}
+
+	var res *http.Response
+	var err error
+	if res, err = api.httpRequest(options); err != nil {
+		return "", err
+	}
+	return res.Header.Get("ETag"), nil
+}
+
+// CopyPart defined copy an exists object part
+func (multi *MultipartUpload) CopyPart(sourceBucket, sourceObject string, partNumber int,
+	sourceRange string, headers map[string]string) (string, error) {
+
+	var options = GetDefaultRequestOptions()
+	options.Method = "PUT"
+	options.Bucket = multi.Bucket
+	options.Object = multi.Key
+	options.Params["partNumber"] = strconv.Itoa(partNumber)
+	options.Params["uploadId"] = multi.UploadID
+	if headers != nil {
+		options.Headers = headers
+	}
+	options.Headers["x-oss-copy-source"] = fmt.Sprintf("/%s/%s", sourceBucket, quote(sourceObject))
+
+	if len(sourceRange) > 0 {
+		options.Headers["x-oss-copy-source-range"] = sourceRange
+	}
+
+	var result CopyPartResult
+	var err error
+	if err = api.httpRequestWithUnmarshalXML(options, &result); err != nil {
+		return "", err
+	}
+	return result.ETag, nil
+}
+
+// CompleteUpload defined multipart complete upload
+func (multi *MultipartUpload) CompleteUpload(parts []Part, result *CompleteMultipartUploadResult) error {
+	var options = GetDefaultRequestOptions()
+	options.Method = "POST"
+	options.Bucket = multi.Bucket
+	options.Object = multi.Key
+	options.Params["uploadId"] = multi.UploadID
+	var partXML = CompleteMultipartUpload{
+		Parts: parts,
+	}
+	var data, _ = xml.Marshal(partXML)
+	options.Body = bytes.NewBuffer(data)
+	if err := multi.api.httpRequestWithUnmarshalXML(options, &result); err != nil {
+		return err
+	}
+	return nil
+}
+
+// AbortUpload defined abort multipart upload
+func (multi *MultipartUpload) AbortUpload() error {
+	var options = GetDefaultRequestOptions()
+	options.Method = "DELETE"
+	options.Bucket = multi.Bucket
+	options.Object = multi.Key
+	options.Params["uploadId"] = multi.UploadID
+	if _, err := multi.api.httpRequest(options); err != nil {
+		return err
+	}
+	return nil
+}
+
+// ListMultipartUploadOptions defined list multipart upload options
+type ListMultipartUploadOptions struct {
+	Params             map[string]string
+	KeyMarker          string
+	UploadIDMarker     string
+	NextKeyMarker      string
+	NextUploadIDMarker string
+	Delimiter          string
+	Prefix             string
+	MaxUploads         string
+	EncodingType       string
+}
+
+// GetDefaultListMultipartUploadOptions defined get default list multipart upload options
+func GetDefaultListMultipartUploadOptions() *ListMultipartUploadOptions {
+	var options = new(ListMultipartUploadOptions)
+	options.Params = make(map[string]string)
+	return options
+}
+
+// ListMultipartUpload defined list multipart upload
+func (api *API) ListMultipartUpload(bucket string, opts *ListMultipartUploadOptions) ([]*MultipartUpload, error) {
+	var options = GetDefaultRequestOptions()
+	options.Method = "GET"
+	options.Bucket = bucket
+	options.Params = opts.Params
+	options.Params["uploads"] = "uploads"
+	options.Params["delimiter"] = opts.Delimiter
+	options.Params["max-uploads"] = opts.MaxUploads
+	options.Params["key-marker"] = opts.KeyMarker
+	options.Params["prefix"] = opts.Prefix
+	options.Params["upload-id-marker"] = opts.UploadIDMarker
+	options.Params["encoding-type"] = opts.EncodingType
+	var result ListMultipartUploadsResult
+	if err := api.httpRequestWithUnmarshalXML(options, &result); err != nil {
+		return nil, err
+	}
+	opts.KeyMarker = result.KeyMarker
+	opts.UploadIDMarker = result.UploadIDMarker
+	opts.NextKeyMarker = result.NextKeyMarker
+	opts.NextUploadIDMarker = result.NextUploadIDMarker
+	opts.Delimiter = result.Delimiter
+	opts.Prefix = result.Prefix
+	opts.MaxUploads = result.MaxUploads
+	var uploads = make([]*MultipartUpload, len(result.Uploads))
+
+	for id, v := range result.Uploads {
+		uploads[id] = &MultipartUpload{
+			api:       api,
+			Bucket:    result.Bucket,
+			Key:       v.Key,
+			UploadID:  v.UploadID,
+			Initiated: v.Initiated,
+		}
+	}
+
+	return uploads, nil
+}
+
+// ListParts defined list parts
+func (multi *MultipartUpload) ListParts(maxParts, partNumberMarker int,
+	result *ListPartsResult) error {
+	var options = GetDefaultRequestOptions()
+	options.Method = "GET"
+	options.Bucket = multi.Bucket
+	options.Object = multi.Key
+	options.Params["uploadId"] = multi.UploadID
+	if err := multi.api.httpRequestWithUnmarshalXML(options, &result); err != nil {
+		return err
+	}
+	return nil
+
+}
