@@ -346,6 +346,27 @@ func handle() *http.ServeMux {
 		}
 		fmt.Fprintf(w, "success")
 	})
+	mux.HandleFunc("/403/", func(w http.ResponseWriter, req *http.Request) {
+		w.WriteHeader(http.StatusForbidden)
+		fmt.Fprintf(w, `<?xml version="1.0" ?>
+<Error xmlns="http://doc.oss-cn-hangzhou.aliyuncs.com">
+        <Code>InvalidArgument</Code>
+        <Message>
+        </Message>
+        <ArgumentValue>
+                error-acl
+        </ArgumentValue>
+        <ArgumentName>
+                x-oss-acl
+        </ArgumentName>
+        <RequestId>
+                4e63c87a-71dc-87f7-11b5-583a600e0038
+        </RequestId>
+        <HostId>
+                oss-cn-hangzhou.aliyuncs.com
+        </HostId>
+</Error>`)
+	})
 	return mux
 }
 

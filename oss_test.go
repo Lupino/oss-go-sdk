@@ -69,6 +69,9 @@ func TestHttpRequest(t *testing.T) {
 	api = NewAPI(options)
 	_, err = api.httpRequest(reqOptions)
 	fmt.Printf("%v\n", err)
+
+	var acl AccessControlPolicy
+	err = api.httpRequestWithUnmarshalXML(reqOptions, &acl)
 }
 
 func TestGetService(t *testing.T) {
@@ -160,7 +163,7 @@ func TestCreateBucket(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err = api.PutBucketACL("bucket", "public-read-write", nil); err != nil {
+	if err = api.PutBucketACL("bucket", "public-read-write", map[string]string{"other": "other"}); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -258,6 +261,7 @@ func TestSignURLAuthWithExpireTime(t *testing.T) {
 func TestObjectAPI(t *testing.T) {
 	var bucket = "bucket"
 	var object = "object"
+	var failBucket = "403"
 	var body = bytes.NewBufferString("this is the body")
 	var contentType = "plan/text"
 	var headers = make(map[string]string)
@@ -275,6 +279,9 @@ func TestObjectAPI(t *testing.T) {
 	}
 
 	var data io.Reader
+	if data, err = api.GetObject(failBucket, object, nil, nil); err == nil {
+		t.Fatal("need fail, but success")
+	}
 	if data, err = api.GetObject(bucket, object, nil, nil); err != nil {
 		t.Fatal(err)
 	}
@@ -294,6 +301,10 @@ func TestObjectAPI(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	if _, err = api.HeadObject(failBucket, object, nil); err == nil {
+		t.Fatal("need fail, but success")
+	}
+
 	if err = api.DeleteObject(bucket, object); err != nil {
 		t.Fatal(err)
 	}
@@ -308,6 +319,10 @@ func TestObjectAPI(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	body = bytes.NewBufferString("this is the body")
+	if _, err = api.AppendObject(failBucket, object, 0, bufio.NewReader(body), headers); err == nil {
+		t.Fatal("need fail, but success")
+	}
 	body = bytes.NewBufferString("this is the body")
 	if _, err = api.AppendObject(bucket, object, 0, bufio.NewReader(body), headers); err != nil {
 		t.Fatal(err)
@@ -326,6 +341,7 @@ func TestObjectAPI(t *testing.T) {
 
 func TestMultipartUploadAPI(t *testing.T) {
 	var bucket = "bucket"
+	var failBucket = "403"
 	var object = "object"
 	var uploadID = "uploadID"
 	var contentType = "plan/text"
@@ -333,13 +349,25 @@ func TestMultipartUploadAPI(t *testing.T) {
 	headers["Content-Type"] = contentType
 	var err error
 	var multi *MultipartUpload
-	multi, err = api.GetMultiPartUpload(bucket, object, uploadID)
+	var badMulti *MultipartUpload
+
+	badMulti, err = api.GetMultiPartUpload(failBucket, object, uploadID)
+
+	if multi, err = api.NewMultipartUpload(failBucket, object, headers); err == nil {
+		t.Fatal("need fail, but success")
+	}
+
 	if multi, err = api.NewMultipartUpload(bucket, object, headers); err != nil {
 		t.Fatal(err)
 	}
 
 	var body = bytes.NewBufferString("this is the body")
 	var etag = "etag"
+	if etag, err = badMulti.UploadPart(1, body); err == nil {
+		t.Fatal("need fail, but success")
+	}
+	body = bytes.NewBufferString("this is the body")
+	etag = "etag"
 	if etag, err = multi.UploadPart(1, body); err != nil {
 		t.Fatal(err)
 	}
@@ -352,6 +380,10 @@ func TestMultipartUploadAPI(t *testing.T) {
 		t.Fatal(err)
 	}
 	fmt.Printf("ETag: %s\n", etag)
+
+	if etag, err = badMulti.CopyPart("bucket1", "object1", 4, "bytes=0-10", headers); err == nil {
+		t.Fatal("need fail, but success")
+	}
 
 	if etag, err = multi.CopyPart("bucket1", "object1", 4, "bytes=0-10", headers); err != nil {
 		t.Fatal(err)
@@ -386,11 +418,16 @@ func TestMultipartUploadAPI(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	if _, err = api.ListMultipartUpload(failBucket, opts); err == nil {
+		t.Fatal("need fail, but success")
+	}
+
 }
 
 func TestBucketCORSAPI(t *testing.T) {
 	var bucket = "bucket"
 	var object = "object"
+	var failBucket = "403"
 	var rules = []CORSRule{
 		CORSRule{
 			AllowedOrigin: []string{"*"},
@@ -426,5 +463,8 @@ func TestBucketCORSAPI(t *testing.T) {
 
 	if _, err = api.OptionObject(bucket, object, nil); err != nil {
 		t.Fatal(err)
+	}
+	if _, err = api.OptionObject(failBucket, object, nil); err == nil {
+		t.Fatal("need fail, but success")
 	}
 }
