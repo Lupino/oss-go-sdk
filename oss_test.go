@@ -33,8 +33,6 @@ func TestSetValue(t *testing.T) {
 	api.SetTimeout(5)
 	api.SetDebug()
 	api.SetRetryTimes(5)
-	api.SetSendBufferSize(1024)
-	api.SetRecvBufferSize(1024 * 1024)
 	api.SetIsOSSHost(false)
 }
 

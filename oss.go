@@ -43,8 +43,6 @@ func GetDefaultAPIOptioins() *APIOptions {
 
 // API A simple OSS API
 type API struct {
-	sendBufferSize  int
-	recvBufferSize  int
 	host            string
 	accessID        string
 	secretAccessKey string
@@ -62,8 +60,6 @@ type API struct {
 // NewAPI initial simple OSS API
 func NewAPI(options *APIOptions) *API {
 	var api = new(API)
-	api.sendBufferSize = 8192
-	api.recvBufferSize = 1024 * 1024 * 10
 	api.host = getHostFromList(options.Host)
 	api.accessID = options.AccessID
 	api.secretAccessKey = options.SecretAccessKey
@@ -92,16 +88,6 @@ func (api *API) SetDebug() {
 // SetRetryTimes set retry times for OSS API
 func (api *API) SetRetryTimes(retryTimes int) {
 	api.retryTimes = retryTimes
-}
-
-// SetSendBufferSize set send buffer size for OSS API
-func (api *API) SetSendBufferSize(bufSize int) {
-	api.sendBufferSize = bufSize
-}
-
-// SetRecvBufferSize set recv buffer size for OSS API
-func (api *API) SetRecvBufferSize(bufSize int) {
-	api.recvBufferSize = bufSize
 }
 
 // SetIsOSSHost set is oss host for OSS API
