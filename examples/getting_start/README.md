@@ -1,4 +1,4 @@
-# Geting start with oss-go-sdk
+# Getting start with oss-go-sdk
 
 In this tutorial you will find how to start oss-go-sdk and get the bucket list from the server
 
