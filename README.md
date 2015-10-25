@@ -59,7 +59,9 @@ var e = oss.ParseError(err)
 
 ## Tutorial
 
-[Getting start with oss-go-sdk](examples/getting_start)
+* [Getting start with oss-go-sdk](examples/getting_start)
+
+* [How to create a static website on OSS](examples/website)
 
 ## API docs
 
