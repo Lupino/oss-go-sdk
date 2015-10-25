@@ -1,9 +1,9 @@
 package main
 
 import (
-    "github.com/Lupino/oss-go-sdk"
-    "log"
-    "os"
+	"github.com/Lupino/oss-go-sdk"
+	"log"
+	"os"
 )
 
 // AccessKeyID defined Access Key ID
@@ -13,34 +13,34 @@ const AccessKeyID = ""
 const AccessKeySecret = ""
 
 func main() {
-    var APIOptions = oss.GetDefaultAPIOptioins()
-    APIOptions.AccessID = AccessKeyID
-    APIOptions.SecretAccessKey = AccessKeySecret
-    var OSSAPI = oss.NewAPI(APIOptions)
+	var APIOptions = oss.GetDefaultAPIOptioins()
+	APIOptions.AccessID = AccessKeyID
+	APIOptions.SecretAccessKey = AccessKeySecret
+	var OSSAPI = oss.NewAPI(APIOptions)
 
-    var bucket = "ossgosdkwebsite"
-    var err error
+	var bucket = "ossgosdkwebsite"
+	var err error
 
 	if err = OSSAPI.PutBucket(bucket, oss.ACLPublicReadWrite, nil, nil); err != nil {
-        var e = oss.ParseError(err)
-        log.Printf("Code: %s\nMessage: %s\n", e.Code, e.Message)
+		var e = oss.ParseError(err)
+		log.Printf("Code: %s\nMessage: %s\n", e.Code, e.Message)
 	}
 
 	if err = OSSAPI.PutBucketWebsite(bucket, "index.html", "error.html"); err != nil {
 		var e = oss.ParseError(err)
-        log.Printf("Code: %s\nMessage: %s\n", e.Code, e.Message)
+		log.Printf("Code: %s\nMessage: %s\n", e.Code, e.Message)
 	}
 
-    upload(OSSAPI, bucket, "index.html")
-    upload(OSSAPI, bucket, "error.html")
-    upload(OSSAPI, bucket, "css/screen.css")
-    upload(OSSAPI, bucket, "js/application.js")
-    log.Println("success.")
+	upload(OSSAPI, bucket, "index.html")
+	upload(OSSAPI, bucket, "error.html")
+	upload(OSSAPI, bucket, "css/screen.css")
+	upload(OSSAPI, bucket, "js/application.js")
+	log.Println("success.")
 }
 
 func upload(OSSAPI *oss.API, bucket, filename string) {
 	fp, err := os.Open(filename)
-    defer fp.Close()
+	defer fp.Close()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -50,6 +50,6 @@ func upload(OSSAPI *oss.API, bucket, filename string) {
 
 	if err = OSSAPI.PutObject(bucket, filename, fp, headers); err != nil {
 		var e = oss.ParseError(err)
-        log.Printf("Code: %s\nMessage: %s\n", e.Code, e.Message)
+		log.Printf("Code: %s\nMessage: %s\n", e.Code, e.Message)
 	}
 }
