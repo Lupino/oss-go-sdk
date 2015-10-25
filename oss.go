@@ -689,7 +689,7 @@ func (api *API) AppendObject(bucket, object string, position int, body io.Reader
 	headers map[string]string) (result http.Header, err error) {
 
 	var options = GetDefaultRequestOptions()
-	options.Method = "PUT"
+	options.Method = "POST"
 	options.Bucket = bucket
 	options.Object = object
 	if headers != nil {
@@ -706,7 +706,7 @@ func (api *API) AppendObject(bucket, object string, position int, body io.Reader
 		options.Body = bytes.NewBuffer(data)
 	}
 	options.Params["append"] = ""
-	options.Params["postion"] = strconv.Itoa(position)
+	options.Params["position"] = strconv.Itoa(position)
 	var res *http.Response
 	if res, err = api.httpRequest(options); err != nil {
 		return
