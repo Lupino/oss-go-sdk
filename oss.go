@@ -14,10 +14,10 @@ import (
 	"time"
 )
 
-// AGENT defined a http requset agent
+// AGENT http requset agent
 var AGENT string
 
-// Version defined OSS package version
+// Version OSS package version
 const Version = "0.0.1"
 
 func init() {
@@ -28,7 +28,9 @@ func init() {
 type APIOptions struct {
 	Host string
 	// Port            int
-	AccessID        string
+	// access key you create on aliyun console website
+	AccessID string
+	// access secret you create
 	SecretAccessKey string
 	IsSecurity      bool
 	StsToken        string
@@ -51,10 +53,11 @@ type API struct {
 	retryTimes      int
 	agent           string
 	debug           bool
-	timeout         int
-	isOSSDomain     bool
-	stsToken        string
-	provider        string
+	// instance level timeout for all operations, default is 60s
+	timeout     int
+	isOSSDomain bool
+	stsToken    string
+	provider    string
 }
 
 // NewAPI initial simple OSS API
@@ -97,17 +100,23 @@ func (api *API) SetIsOSSHost(isOSSHost bool) {
 
 // SignURLOptions defined sign url options
 type SignURLOptions struct {
-	Method   string            // one of PUT, GET, DELETE, HEAD
-	URL      string            // HTTP address of bucket or object, eg: http://HOST/bucket/object
-	Headers  map[string]string // HTTP header
-	Resource string            // path of bucket or bbject, eg: /bucket/ or /bucket/object
+	// one of PUT, GET, DELETE, HEAD
+	Method string
+	// HTTP address of bucket or object, eg: http://HOST/bucket/object
+	URL string
+	// HTTP header
+	Headers map[string]string
+	// path of bucket or bbject, eg: /bucket/ or /bucket/object
+	Resource string
 	Timeout  time.Duration
 	Params   map[string]string
-	Object   string // only for SignURL
-	Bucket   string // only for SignURL
+	// only for SignURL
+	Object string
+	// only for SignURL
+	Bucket string
 }
 
-// GetDefaultSignURLOptions defined default sign url options
+// GetDefaultSignURLOptions get default sign url options
 func GetDefaultSignURLOptions() *SignURLOptions {
 	var options = new(SignURLOptions)
 	options.Method = "GET"
@@ -171,14 +180,9 @@ func (api *API) SignURL(options *SignURLOptions) string {
 // Create the authorization for OSS based on header input.
 // it should be put into "Authorization" parameter of header.
 //
-// :type method: string
-// :param:one of PUT, GET, DELETE, HEAD
-//
-// :type headers: dict
-// :param: HTTP header
-//
-// :type resource: string
-// :param:path of bucket or object, eg: /bucket/ or /bucket/object
+//      - method: one of PUT, GET, DELETE, HEAD
+//      - headers: HTTP header
+//      - resource: path of bucket or object, eg: /bucket/ or /bucket/object
 //
 // Returns:
 //     signature string
@@ -190,10 +194,12 @@ func (api *API) createSignForNormalAuth(method string, headers map[string]string
 
 // RequestOptions defined requset options
 type RequestOptions struct {
-	Method  string // one of PUT, GET, DELETE, HEAD, POST
-	Bucket  string
-	Object  string
-	Headers map[string]string // HTTP header
+	// one of PUT, GET, DELETE, HEAD, POST
+	Method string
+	Bucket string
+	Object string
+	// HTTP header
+	Headers map[string]string
 	Body    io.Reader
 	Params  map[string]string
 }
@@ -330,7 +336,7 @@ func (api *API) ListAllMyBuckets(result *ListAllMyBucketsResult, headers map[str
 	return api.httpRequestWithUnmarshalXML(options, result)
 }
 
-// GetBucketACL Get Access Control Level of bucket
+// GetBucketACL get the bucket ACL.
 func (api *API) GetBucketACL(bucket string, result *AccessControlPolicy) error {
 	var options = GetDefaultRequestOptions()
 	options.Bucket = bucket
@@ -365,7 +371,7 @@ func (api *API) ListBucket(bucket string, result *ListBucketResult, headers map[
 	return api.httpRequestWithUnmarshalXML(options, result)
 }
 
-// GetBucketWebsite Get bucket website
+// GetBucketWebsite Get bucket website config.
 func (api *API) GetBucketWebsite(bucket string, result *WebsiteConfiguration) error {
 	var options = GetDefaultRequestOptions()
 	options.Bucket = bucket
@@ -373,7 +379,7 @@ func (api *API) GetBucketWebsite(bucket string, result *WebsiteConfiguration) er
 	return api.httpRequestWithUnmarshalXML(options, result)
 }
 
-// GetBucketReferer Get bucket referer list
+// GetBucketReferer Get the bucket request Referer white list.
 func (api *API) GetBucketReferer(bucket string, result *RefererConfiguration) error {
 	var options = GetDefaultRequestOptions()
 	options.Bucket = bucket
@@ -389,7 +395,7 @@ func (api *API) GetBucketLifecycle(bucket string, result *LifecycleConfiguration
 	return api.httpRequestWithUnmarshalXML(options, result)
 }
 
-// GetBucketLogging Get bucket logging
+// GetBucketLogging Get bucket logging settings
 func (api *API) GetBucketLogging(bucket string, result *BucketLoggingStatus) error {
 	var options = GetDefaultRequestOptions()
 	options.Bucket = bucket
@@ -397,21 +403,17 @@ func (api *API) GetBucketLogging(bucket string, result *BucketLoggingStatus) err
 	return api.httpRequestWithUnmarshalXML(options, result)
 }
 
-// CreateBucket defined create bucket
+// CreateBucket create bucket
 func (api *API) CreateBucket(bucket string, acl ACLGrant, headers map[string]string) error {
 	return api.PutBucket(bucket, acl, nil, headers)
 }
 
 // PutBucket create bucket
 //
-// :type bucket: string
-// :param
-//
-// :type acl: ACLGrant
-// :param: one of private public-read public-read-write
-//
-// :type headers: map[string]string
-// :param: HTTP header
+//      - bucket: bucket name If bucket exists and not belong to current account, will throw BucketAlreadyExistsError. If bucket not exists, will create a new bucket and set it's ACL
+//      - acl: one of private public-read public-read-write
+//      - config *CreateBucketConfiguration
+//      - headers: HTTP header
 func (api *API) PutBucket(bucket string, acl ACLGrant, config *CreateBucketConfiguration, headers map[string]string) error {
 	var options = GetDefaultRequestOptions()
 	options.Method = "PUT"
@@ -442,7 +444,8 @@ func (api *API) PutBucketACL(bucket string, acl ACLGrant, headers map[string]str
 	return api.httpRequestWithUnmarshalXML(options, nil)
 }
 
-// PutBucketLogging Put bucket logging
+// PutBucketLogging Update the bucket logging settings.
+// Log file will create every one hour and name format: <prefix><bucket>-YYYY-mm-DD-HH-MM-SS-UniqueString.
 func (api *API) PutBucketLogging(sourcebucket, targetbucket, prefix string) error {
 	var options = GetDefaultRequestOptions()
 	options.Method = "PUT"
@@ -457,16 +460,10 @@ func (api *API) PutBucketLogging(sourcebucket, targetbucket, prefix string) erro
 	return api.httpRequestWithUnmarshalXML(options, nil)
 }
 
-// PutBucketWebsite Put bucket website
+// PutBucketWebsite Set the bucket as a static website.
 //
-// :type bucket: string
-// :param
-//
-// :type indexfile: string
-// :param: the object that contain index page
-//
-// :type errorfile: string
-// :param: the object taht contain error page
+//      - indexfile: the object that contain index page
+//      - errorfile: the object taht contain error page
 func (api *API) PutBucketWebsite(bucket, indexfile, errorfile string) error {
 	var options = GetDefaultRequestOptions()
 	options.Method = "PUT"
@@ -481,7 +478,7 @@ func (api *API) PutBucketWebsite(bucket, indexfile, errorfile string) error {
 	return api.httpRequestWithUnmarshalXML(options, nil)
 }
 
-// PutBucketLifecycle put bucket lifecycle
+// PutBucketLifecycle Set the bucket object lifecycle.
 func (api *API) PutBucketLifecycle(bucket string, rule LifecycleRule) error {
 	var options = GetDefaultRequestOptions()
 	options.Method = "PUT"
@@ -495,7 +492,7 @@ func (api *API) PutBucketLifecycle(bucket string, rule LifecycleRule) error {
 	return api.httpRequestWithUnmarshalXML(options, nil)
 }
 
-// PutBucketReferer put bucket referer
+// PutBucketReferer Set the bucket request Referer white list.
 func (api *API) PutBucketReferer(bucket string, config RefererConfiguration) error {
 	var options = GetDefaultRequestOptions()
 	options.Method = "PUT"
@@ -508,7 +505,8 @@ func (api *API) PutBucketReferer(bucket string, config RefererConfiguration) err
 	return api.httpRequestWithUnmarshalXML(options, nil)
 }
 
-// DeleteBucket List object that in bucket
+// DeleteBucket Delete an empty bucket.
+// If bucket is not empty, will throw BucketNotEmptyError. If bucket is not exists, will throw NoSuchBucketError.
 func (api *API) DeleteBucket(bucket string) error {
 	var options = GetDefaultRequestOptions()
 	options.Method = "DELETE"
@@ -516,7 +514,7 @@ func (api *API) DeleteBucket(bucket string) error {
 	return api.httpRequestWithUnmarshalXML(options, nil)
 }
 
-// DeleteBucketWebsite Delete bucket website
+// DeleteBucketWebsite Delete bucket website config
 func (api *API) DeleteBucketWebsite(bucket string) error {
 	var options = GetDefaultRequestOptions()
 	options.Method = "DELETE"
@@ -525,7 +523,7 @@ func (api *API) DeleteBucketWebsite(bucket string) error {
 	return api.httpRequestWithUnmarshalXML(options, nil)
 }
 
-// DeleteBucketLifecycle Delete bucket lifecycle
+// DeleteBucketLifecycle Delete bucket object lifecycle
 func (api *API) DeleteBucketLifecycle(bucket string) error {
 	var options = GetDefaultRequestOptions()
 	options.Method = "DELETE"
@@ -534,7 +532,7 @@ func (api *API) DeleteBucketLifecycle(bucket string) error {
 	return api.httpRequestWithUnmarshalXML(options, nil)
 }
 
-// DeleteBucketLogging Delete bucket logging
+// DeleteBucketLogging Delete bucket logging settings
 func (api *API) DeleteBucketLogging(bucket string) error {
 	var options = GetDefaultRequestOptions()
 	options.Method = "DELETE"
@@ -543,7 +541,7 @@ func (api *API) DeleteBucketLogging(bucket string) error {
 	return api.httpRequestWithUnmarshalXML(options, nil)
 }
 
-// GetObject defined get object
+// GetObject Get an object from the bucket.
 func (api *API) GetObject(bucket, object string, headers, params map[string]string) (io.Reader, error) {
 	var options = GetDefaultRequestOptions()
 	options.Bucket = bucket
@@ -561,7 +559,7 @@ func (api *API) GetObject(bucket, object string, headers, params map[string]stri
 	return reader, nil
 }
 
-// GetObjectACL defined get object acl
+// GetObjectACL get object acl
 func (api *API) GetObjectACL(bucket, object string, result *AccessControlPolicy) error {
 	var options = GetDefaultRequestOptions()
 	options.Bucket = bucket
@@ -570,7 +568,7 @@ func (api *API) GetObjectACL(bucket, object string, result *AccessControlPolicy)
 	return api.httpRequestWithUnmarshalXML(options, result)
 }
 
-// HeadObject defined head object
+// HeadObject Head an object and get the meta info.
 func (api *API) HeadObject(bucket, object string, headers map[string]string) (result http.Header, err error) {
 	var options = GetDefaultRequestOptions()
 	options.Method = "HEAD"
@@ -583,7 +581,12 @@ func (api *API) HeadObject(bucket, object string, headers map[string]string) (re
 	return res.Header, nil
 }
 
-// PutObject defined put object
+// PutObject Add an object to the bucket.
+//
+//      - bucket: an exists bucket
+//      - object: object name store on OSS
+//      - body: readable object
+//      - headers: HTTP Header
 func (api *API) PutObject(bucket, object string, body io.Reader, headers map[string]string) error {
 	var options = GetDefaultRequestOptions()
 	options.Method = "PUT"
@@ -613,7 +616,7 @@ func (api *API) PostObject(bucket, object string, body io.Reader, headers map[st
 	return api.PutObject(bucket, object, body, headers)
 }
 
-// PutObjectACL defined put object acl
+// PutObjectACL update object acl
 func (api *API) PutObjectACL(bucket, object, acl string) error {
 	var options = GetDefaultRequestOptions()
 	options.Method = "PUT"
@@ -625,7 +628,7 @@ func (api *API) PutObjectACL(bucket, object, acl string) error {
 	return err
 }
 
-// CopyObject defined copy object
+// CopyObject Copy an object from sourceName to name.
 func (api *API) CopyObject(sourceBucket, sourceObject, targetBucket, targetObject string,
 	headers map[string]string) (result CopyObjectResult, err error) {
 	var options = GetDefaultRequestOptions()
@@ -641,7 +644,7 @@ func (api *API) CopyObject(sourceBucket, sourceObject, targetBucket, targetObjec
 	return
 }
 
-// AppendObject defined append object
+// AppendObject append data to an appendable object
 func (api *API) AppendObject(bucket, object string, position int, body io.Reader,
 	headers map[string]string) (result http.Header, err error) {
 
@@ -675,7 +678,7 @@ func (api *API) AppendObject(bucket, object string, position int, body io.Reader
 
 }
 
-// DeleteObject defined delete object
+// DeleteObject Delete an object from the bucket.
 func (api *API) DeleteObject(bucket, object string) error {
 	var options = GetDefaultRequestOptions()
 	options.Method = "DELETE"
@@ -684,7 +687,7 @@ func (api *API) DeleteObject(bucket, object string) error {
 	return api.httpRequestWithUnmarshalXML(options, nil)
 }
 
-// DeleteObjects defined delete multiple object
+// DeleteObjects Delete multi objects in one request.
 func (api *API) DeleteObjects(bucket string, objects []string, result *DeleteResult) error {
 	var options = GetDefaultRequestOptions()
 	options.Method = "POST"
@@ -724,7 +727,7 @@ type MultipartUpload struct {
 	Initiated time.Time
 }
 
-// NewMultipartUpload defined initial multipart upload
+// NewMultipartUpload initial multipart upload
 func (api *API) NewMultipartUpload(bucket, object string, headers map[string]string) (*MultipartUpload, error) {
 	var options = GetDefaultRequestOptions()
 	options.Method = "POST"
@@ -743,7 +746,7 @@ func (api *API) NewMultipartUpload(bucket, object string, headers map[string]str
 	return multi, nil
 }
 
-// GetMultiPartUpload defined get multipart upload
+// GetMultiPartUpload get multipart upload
 func (api *API) GetMultiPartUpload(bucket, object, uploadID string) (*MultipartUpload, error) {
 	var multi = new(MultipartUpload)
 	multi.Bucket = bucket
@@ -753,7 +756,7 @@ func (api *API) GetMultiPartUpload(bucket, object, uploadID string) (*MultipartU
 	return multi, nil
 }
 
-// UploadPart defined upload part
+// UploadPart upload part
 func (multi *MultipartUpload) UploadPart(partNumber int, body io.Reader) (string, error) {
 	var options = GetDefaultRequestOptions()
 	options.Method = "PUT"
@@ -780,7 +783,7 @@ func (multi *MultipartUpload) UploadPart(partNumber int, body io.Reader) (string
 	return res.Header.Get("ETag"), nil
 }
 
-// CopyPart defined copy an exists object part
+// CopyPart copy an exists object part
 func (multi *MultipartUpload) CopyPart(sourceBucket, sourceObject string, partNumber int,
 	sourceRange string, headers map[string]string) (string, error) {
 
@@ -807,7 +810,7 @@ func (multi *MultipartUpload) CopyPart(sourceBucket, sourceObject string, partNu
 	return result.ETag, nil
 }
 
-// CompleteUpload defined multipart complete upload
+// CompleteUpload multipart complete upload
 func (multi *MultipartUpload) CompleteUpload(parts []Part, result *CompleteMultipartUploadResult) error {
 	var options = GetDefaultRequestOptions()
 	options.Method = "POST"
@@ -822,7 +825,7 @@ func (multi *MultipartUpload) CompleteUpload(parts []Part, result *CompleteMulti
 	return multi.api.httpRequestWithUnmarshalXML(options, &result)
 }
 
-// AbortUpload defined abort multipart upload
+// AbortUpload abort multipart upload
 func (multi *MultipartUpload) AbortUpload() error {
 	var options = GetDefaultRequestOptions()
 	options.Method = "DELETE"
@@ -833,7 +836,7 @@ func (multi *MultipartUpload) AbortUpload() error {
 	return err
 }
 
-// ListMultipartUploadOptions defined list multipart upload options
+// ListMultipartUploadOptions list multipart upload options
 type ListMultipartUploadOptions struct {
 	Params             map[string]string
 	KeyMarker          string
@@ -846,14 +849,14 @@ type ListMultipartUploadOptions struct {
 	EncodingType       string
 }
 
-// GetDefaultListMultipartUploadOptions defined get default list multipart upload options
+// GetDefaultListMultipartUploadOptions get default list multipart upload options
 func GetDefaultListMultipartUploadOptions() *ListMultipartUploadOptions {
 	var options = new(ListMultipartUploadOptions)
 	options.Params = make(map[string]string)
 	return options
 }
 
-// ListMultipartUpload defined list multipart upload
+// ListMultipartUpload list multipart upload
 func (api *API) ListMultipartUpload(bucket string, opts *ListMultipartUploadOptions) ([]*MultipartUpload, error) {
 	var options = GetDefaultRequestOptions()
 	options.Method = "GET"
@@ -892,7 +895,7 @@ func (api *API) ListMultipartUpload(bucket string, opts *ListMultipartUploadOpti
 	return uploads, nil
 }
 
-// ListParts defined list parts
+// ListParts list parts
 func (multi *MultipartUpload) ListParts(maxParts, partNumberMarker int,
 	result *ListPartsResult) error {
 	var options = GetDefaultRequestOptions()
@@ -903,7 +906,7 @@ func (multi *MultipartUpload) ListParts(maxParts, partNumberMarker int,
 	return multi.api.httpRequestWithUnmarshalXML(options, &result)
 }
 
-// PutBucketCORS defined put bucket cors
+// PutBucketCORS put bucket cors
 func (api *API) PutBucketCORS(bucket string, config CORSConfiguration) error {
 	var options = GetDefaultRequestOptions()
 	options.Method = "PUT"
@@ -931,7 +934,7 @@ func (api *API) DeleteBucketCORS(bucket string) error {
 	return api.httpRequestWithUnmarshalXML(options, nil)
 }
 
-// OptionObject defined option object
+// OptionObject option object
 func (api *API) OptionObject(bucket, object string, headers map[string]string) (http.Header, error) {
 	var options = GetDefaultRequestOptions()
 	options.Method = "OPTIONS"

@@ -5,11 +5,14 @@ import (
 	"time"
 )
 
-// Bucket defined bucket
-type Bucket struct {
-	XMLName      xml.Name `xml:"Bucket"`
-	Location     string
-	Name         string
+// BucketMeta defined bucket meta
+type BucketMeta struct {
+	XMLName xml.Name `xml:"Bucket"`
+	// bucket store data region, e.g.: oss-cn-hangzhou-a
+	Location string
+	// bucket name
+	Name string
+	//  bucket create GMT date, e.g.: 2015-02-19T08:39:44.000Z
 	CreationDate time.Time
 }
 
@@ -22,14 +25,20 @@ type Owner struct {
 
 // ListAllMyBucketsResult defined list all my buckets result
 type ListAllMyBucketsResult struct {
-	XMLName     xml.Name `xml:"ListAllMyBucketsResult"`
-	Prefix      string
-	Marker      string
-	MaxKeys     string
+	XMLName xml.Name `xml:"ListAllMyBucketsResult"`
+	// search buckets using prefix key
+	Prefix string
+	// search start from marker, including marker key
+	Marker string
+	// max buckets, default is 100, limit to 1000
+	MaxKeys string
+	// truncate or not
 	IsTruncated bool
-	NextMarker  string
-	Owner       Owner
-	Buckets     []Bucket `xml:"Buckets>Bucket"`
+	// next marker string
+	NextMarker string
+	// object owner, including id and displayName
+	Owner   Owner
+	Buckets []BucketMeta `xml:"Buckets>Bucket"`
 }
 
 // Content defined get bucket content
@@ -66,14 +75,15 @@ type AccessControlPolicy struct {
 	AccessControlList []string `xml:"AccessControlList>Grant"`
 }
 
-// LocationConstraint defined location constraint
+// LocationConstraint the bucket data region location, Current available: oss-cn-hangzhou, oss-cn-qingdao, oss-cn-beijing, oss-cn-hongkong and oss-cn-shenzhen If change exists bucket region, will throw BucketAlreadyExistsError. If region value invalid, will throw InvalidLocationConstraintError.
 type LocationConstraint string
 
 // BucketLoggingStatus defined bucket logging status
 type BucketLoggingStatus struct {
 	XMLName xml.Name `xml:"BucketLoggingStatus"`
 	Bucket  string   `xml:"LoggingEnabled>TargetBucket"`
-	Prefix  string   `xml:"LoggingEnabled>TargetPrefix"`
+	// prefix path name to store the log files
+	Prefix string `xml:"LoggingEnabled>TargetPrefix"`
 }
 
 // WebsiteConfiguration defined website configuration
@@ -102,11 +112,17 @@ type RefererConfiguration struct {
 
 // LifecycleRule defined lifecycle configuration rule
 type LifecycleRule struct {
-	XMLName        xml.Name `xml:"Rule"`
-	ID             string
-	Prefix         string
-	Status         string
-	ExpirationDays int `xml:"Expiration>Days"`
+	XMLName xml.Name `xml:"Rule"`
+	// rule id, if not set, OSS will auto create it with random string.
+	ID string
+	// store prefix
+	Prefix string
+	// rule status, allow values: Enabled or Disabled
+	Status string
+	// expire days, date and days only set one.
+	ExpirationDays int `xml:"Expiration>Days,omitempty"`
+	// expire date, e.g.: 2022-10-11T00:00:00.000Z date and days only set one.
+	ExpirationDate time.Time `xml:"Expiration>Date,omitempty"`
 }
 
 // LifecycleConfiguration defined lifecycle configuration
@@ -117,7 +133,8 @@ type LifecycleConfiguration struct {
 
 // CreateBucketConfiguration defined create bucket configuration
 type CreateBucketConfiguration struct {
-	XMLName            xml.Name `xml:"CreateBucketConfiguration"`
+	XMLName xml.Name `xml:"CreateBucketConfiguration"`
+	// the bucket data region location, Current available: oss-cn-hangzhou, oss-cn-qingdao, oss-cn-beijing, oss-cn-hongkong and oss-cn-shenzhen If change exists bucket region, will throw BucketAlreadyExistsError. If region value invalid, will throw InvalidLocationConstraintError.
 	LocationConstraint string
 }
 
