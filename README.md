@@ -59,4 +59,4 @@ var e = oss.ParseError(err)
 
 ## API docs
 
-[API docs](https://godoc.org/github.com/Lupino/oss-go-api)
+[API docs](https://godoc.org/github.com/Lupino/oss-go-sdk)
