@@ -1,3 +1,34 @@
+// Package oss aliyun OSS(open storage service) golang client.
+//
+// ## Create Account
+//
+// Go to [OSS website](http://www.aliyun.com/product/oss/?lang=en), create a new account for new user.
+//
+// After account created, you can create the OSS instance and get the `accessKeyId` and `accessKeySecret`.
+//
+// ## Initial OSS API
+//
+//  import (
+//      "github.com/Lupino/oss-go-sdk"
+//  )
+//  var APIOptions = oss.GetDefaultAPIOptioins()
+//  APIOptions.AccessID = AccessKeyID
+//  APIOptions.SecretAccessKey = AccessKeySecret
+//  var OSSAPI = oss.NewAPI(APIOptions)
+//
+// ## Get Service
+//
+//  var result oss.ListAllMyBucketsResult
+//  var headers = make(map[string]string)
+//  var err error
+//  err = OSSAPI.GetService(&result, headers)
+//
+// ## Parse the error
+//
+// all the error is the error xml so you shoud parse the error and see the error message.
+//
+//  var e = oss.ParseError(err)
+//
 package oss
 
 import (
