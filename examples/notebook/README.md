@@ -2,7 +2,7 @@
 
 In this tutorial you will use the `AppendObject` to create a light notebook.
 
-## Defined the fromat of notebook
+## Defined the format of notebook
 
 ```text
 2015-10-25 15:20:04
