@@ -61,7 +61,8 @@ var e = oss.ParseError(err)
 
 * [Getting start with oss-go-sdk](examples/getting_start)
 * [How to create a static website on OSS](examples/website)
-* [how to upload file and download file use oss-go-sdk](examples/file_upload_download)
+* [How to upload file and download file use oss-go-sdk](examples/file_upload_download)
+* [A lite notebook use `AppendObject`](examples/notebook)
 
 ## API docs
 
