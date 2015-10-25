@@ -258,7 +258,7 @@ func getBase64MD5WithReader(reader io.Reader) string {
 	return base64.StdEncoding.EncodeToString(h.Sum(nil))
 }
 
-// ParseError defined parse oss api error
+// ParseError parse the error return by OSS server
 func ParseError(err error) (e Error) {
 	var data = []byte(err.Error())
 	xml.Unmarshal(data, &e)
