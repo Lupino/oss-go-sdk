@@ -226,6 +226,12 @@ func TestDeleteBucketLogging(t *testing.T) {
 	}
 }
 
+func TestDeleteBucketReferer(t *testing.T) {
+	if err := api.DeleteBucketReferer("bucket"); err != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestSignURL(t *testing.T) {
 	var apiOptions = GetDefaultAPIOptioins()
 	var options = GetDefaultSignURLOptions()

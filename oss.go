@@ -541,6 +541,15 @@ func (api *API) DeleteBucketLogging(bucket string) error {
 	return api.httpRequestWithUnmarshalXML(options, nil)
 }
 
+// DeleteBucketReferer Delete the bucket request Referer white list.
+func (api *API) DeleteBucketReferer(bucket string) error {
+	var options = GetDefaultRequestOptions()
+	options.Method = "DELETE"
+	options.Bucket = bucket
+	options.Params["referer"] = ""
+	return api.httpRequestWithUnmarshalXML(options, nil)
+}
+
 // GetObject Get an object from the bucket.
 func (api *API) GetObject(bucket, object string, headers, params map[string]string) (io.Reader, error) {
 	var options = GetDefaultRequestOptions()
