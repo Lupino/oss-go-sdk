@@ -59,7 +59,7 @@ var e = oss.ParseError(err)
 
 ## Tutorial
 
-[Getting start with oss-go-sdk](examples/geting_start)
+[Getting start with oss-go-sdk](examples/getting_start)
 
 ## API docs
 
