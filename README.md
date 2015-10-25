@@ -57,6 +57,10 @@ all the error is the error xml so you shoud parse the error and see the error me
 var e = oss.ParseError(err)
 ```
 
+## Tutorial
+
+[Getting start with oss-go-sdk](examples/geting_start)
+
 ## API docs
 
 [API docs](https://godoc.org/github.com/Lupino/oss-go-sdk)
