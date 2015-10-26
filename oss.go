@@ -84,7 +84,7 @@ type API struct {
 	agent           string
 	debug           bool
 	// instance level timeout for all operations, default is 60s
-	timeout     int
+	timeout     time.Duration
 	isOSSDomain bool
 	stsToken    string
 	provider    string
@@ -101,7 +101,7 @@ func NewAPI(options *APIOptions) *API {
 	api.retryTimes = 5
 	api.agent = AGENT
 	api.debug = false
-	api.timeout = 60
+	api.timeout = 60 * time.Second
 	api.isOSSDomain = false
 	api.stsToken = options.StsToken
 	api.provider = PROVIDER
@@ -109,7 +109,7 @@ func NewAPI(options *APIOptions) *API {
 }
 
 // SetTimeout set timeout for OSS API
-func (api *API) SetTimeout(timeout int) {
+func (api *API) SetTimeout(timeout time.Duration) {
 	api.timeout = timeout
 }
 
@@ -312,7 +312,9 @@ func (api *API) httpRequest(options *requestOptions) (res *http.Response, err er
 			req.Header.Add(k, v)
 		}
 
-		var client = &http.Client{}
+		var client = &http.Client{
+			Timeout: api.timeout,
+		}
 
 		if res, err = client.Do(req); err != nil {
 			continue
