@@ -43,7 +43,7 @@ func getHostFromURL(uri string) string {
 
 func TestHttpRequest(t *testing.T) {
 	var err error
-	var reqOptions = new(RequestOptions)
+	var reqOptions = new(requestOptions)
 	reqOptions.Method = "GET"
 	tls := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintln(w, "Hello, client")
