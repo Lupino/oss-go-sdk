@@ -195,11 +195,12 @@ func main() {
 	}
 
 	log.Println("GetObject")
-	var data io.Reader
+	var data io.ReadCloser
 	if data, err = OSSAPI.GetObject(bucket, object, nil, nil); err != nil {
 		var e = oss.ParseError(err)
 		log.Printf("GetObject Error: %s\n", e)
 	}
+	defer data.Close()
 	var buf, _ = ioutil.ReadAll(data)
 	log.Printf("GetObject result: the data length is: %d\n", len(buf))
 

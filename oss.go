@@ -32,7 +32,6 @@
 package oss
 
 import (
-	"bufio"
 	"bytes"
 	"encoding/xml"
 	"errors"
@@ -233,6 +232,8 @@ type RequestOptions struct {
 	Headers map[string]string
 	Body    io.Reader
 	Params  map[string]string
+	// AutoClose the res.Body
+	AutoClose bool
 }
 
 // GetDefaultRequestOptions get default requrest options
@@ -241,6 +242,7 @@ func GetDefaultRequestOptions() *RequestOptions {
 	options.Method = "GET"
 	options.Headers = make(map[string]string)
 	options.Params = make(map[string]string)
+	options.AutoClose = false
 	return options
 }
 
@@ -317,7 +319,10 @@ func (api *API) httpRequest(options *RequestOptions) (res *http.Response, err er
 		}
 		if res.StatusCode/100 != 2 {
 			var errStr, _ = ioutil.ReadAll(res.Body)
+			res.Body.Close()
 			err = errors.New(string(errStr))
+		} else if options.AutoClose {
+			res.Body.Close()
 		}
 		break
 	}
@@ -333,6 +338,7 @@ func (api *API) httpRequestWithUnmarshalXML(options *RequestOptions, result inte
 	if res, err = api.httpRequest(options); err != nil {
 		return err
 	}
+	defer res.Body.Close()
 
 	if result != nil {
 		if data, err = ioutil.ReadAll(res.Body); err != nil {
@@ -582,7 +588,7 @@ func (api *API) DeleteBucketReferer(bucket string) error {
 }
 
 // GetObject Get an object from the bucket.
-func (api *API) GetObject(bucket, object string, headers, params map[string]string) (io.Reader, error) {
+func (api *API) GetObject(bucket, object string, headers, params map[string]string) (io.ReadCloser, error) {
 	var options = GetDefaultRequestOptions()
 	options.Bucket = bucket
 	options.Object = object
@@ -595,8 +601,7 @@ func (api *API) GetObject(bucket, object string, headers, params map[string]stri
 		return nil, err
 	}
 
-	var reader = bufio.NewReader(res.Body)
-	return reader, nil
+	return res.Body, nil
 }
 
 // GetObjectACL get object acl
@@ -614,6 +619,7 @@ func (api *API) HeadObject(bucket, object string, headers map[string]string) (re
 	options.Method = "HEAD"
 	options.Bucket = bucket
 	options.Object = object
+	options.AutoClose = true
 	var res *http.Response
 	if res, err = api.httpRequest(options); err != nil {
 		return
@@ -646,6 +652,8 @@ func (api *API) PutObject(bucket, object string, body io.Reader, headers map[str
 		options.Body = bytes.NewBuffer(data)
 	}
 
+	options.AutoClose = true
+
 	var err error
 	_, err = api.httpRequest(options)
 	return err
@@ -664,6 +672,7 @@ func (api *API) PutObjectACL(bucket, object, acl string) error {
 	options.Object = object
 	options.Headers["x-oss-object-acl"] = acl
 	options.Params["acl"] = ""
+	options.AutoClose = true
 	_, err := api.httpRequest(options)
 	return err
 }
@@ -707,6 +716,7 @@ func (api *API) AppendObject(bucket, object string, position int, body io.Reader
 	}
 	options.Params["append"] = ""
 	options.Params["position"] = strconv.Itoa(position)
+	options.AutoClose = true
 	var res *http.Response
 	if res, err = api.httpRequest(options); err != nil {
 		return
@@ -815,6 +825,8 @@ func (multi *MultipartUpload) UploadPart(partNumber int, body io.Reader) (string
 		options.Body = bytes.NewBuffer(data)
 	}
 
+	options.AutoClose = true
+
 	var res *http.Response
 	var err error
 	if res, err = multi.api.httpRequest(options); err != nil {
@@ -872,6 +884,7 @@ func (multi *MultipartUpload) AbortUpload() error {
 	options.Bucket = multi.Bucket
 	options.Object = multi.Key
 	options.Params["uploadId"] = multi.UploadID
+	options.AutoClose = true
 	_, err := multi.api.httpRequest(options)
 	return err
 }
@@ -981,6 +994,7 @@ func (api *API) OptionObject(bucket, object string, headers map[string]string) (
 	options.Bucket = bucket
 	options.Object = object
 	options.Headers = headers
+	options.AutoClose = true
 	var err error
 	var res *http.Response
 	if res, err = api.httpRequest(options); err != nil {

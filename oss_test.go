@@ -284,7 +284,7 @@ func TestObjectAPI(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	var data io.Reader
+	var data io.ReadCloser
 	if data, err = api.GetObject(failBucket, object, nil, nil); err == nil {
 		t.Fatal("need fail, but success")
 	}

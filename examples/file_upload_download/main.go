@@ -55,9 +55,10 @@ func download(OSSAPI *oss.API, bucket, object, filename string) {
 		log.Fatal(err)
 	}
 	defer fp.Close()
-	var reader io.Reader
+	var reader io.ReadCloser
 	if reader, err = OSSAPI.GetObject(bucket, object, nil, nil); err != nil {
 		log.Fatal(err)
 	}
+	defer reader.Close()
 	io.Copy(fp, reader)
 }

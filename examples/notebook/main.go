@@ -68,13 +68,14 @@ func addLine(OSSAPI *oss.API, bucket, bookName, line string) {
 }
 
 func readNotebook(OSSAPI *oss.API, bucket, bookName string) {
-	var reader io.Reader
+	var reader io.ReadCloser
 	var err error
 
 	if reader, err = OSSAPI.GetObject(bucket, bookName, nil, nil); err != nil {
 		var e = oss.ParseError(err)
 		log.Printf("Code: %s\nMessage: %s\n", e.Code, e.Message)
 	}
+	defer reader.Close()
 	var data, _ = ioutil.ReadAll(reader)
 	fmt.Printf("%s\n", data)
 }
