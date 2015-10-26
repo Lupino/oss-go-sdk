@@ -78,7 +78,6 @@ type API struct {
 	host            string
 	accessID        string
 	secretAccessKey string
-	showBar         bool
 	isSecurity      bool
 	retryTimes      int
 	agent           string
@@ -96,7 +95,6 @@ func NewAPI(options *APIOptions) *API {
 	api.host = getHostFromList(options.Host)
 	api.accessID = options.AccessID
 	api.secretAccessKey = options.SecretAccessKey
-	api.showBar = false
 	api.isSecurity = options.IsSecurity
 	api.retryTimes = 5
 	api.agent = AGENT
