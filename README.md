@@ -35,7 +35,7 @@ import (
 var APIOptions = oss.GetDefaultAPIOptioins()
 APIOptions.AccessID = AccessKeyID
 APIOptions.SecretAccessKey = AccessKeySecret
-var OSSAPI = oss.NewAPI(APIOptions)
+var OSSAPI, err = oss.NewAPI(APIOptions)
 ```
 
 ## Get Service

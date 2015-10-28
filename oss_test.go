@@ -10,6 +10,8 @@ import (
 	"net/http/httptest"
 	"net/url"
 	"os"
+	"strconv"
+	"strings"
 	"testing"
 )
 
@@ -19,8 +21,8 @@ var options *APIOptions
 func init() {
 	var ts = mockHTTPServer()
 	options = GetDefaultAPIOptioins()
-	options.Host = getHostFromURL(ts.URL)
-	api = NewAPI(options)
+	options.Host, options.Port = getHostFromURL(ts.URL)
+	api, _ = NewAPI(options)
 }
 
 func TestPrint(t *testing.T) {
@@ -29,16 +31,32 @@ func TestPrint(t *testing.T) {
 
 func TestSetValue(t *testing.T) {
 	var options = GetDefaultAPIOptioins()
-	var api = NewAPI(options)
+	var api, _ = NewAPI(options)
 	api.SetTimeout(5)
 	api.SetDebug()
 	api.SetRetryTimes(5)
 	api.SetIsOSSHost(false)
 }
 
-func getHostFromURL(uri string) string {
+func getHostFromURL(uri string) (string, int) {
 	var u, _ = url.Parse(uri)
-	return u.Host
+	return getHostPort(u.Host)
+}
+
+func getHostPort(origHost string) (host string, port int) {
+	host = origHost
+	port = 80
+	var hostPortList = strings.SplitN(origHost, ":", 2)
+	var err error
+	if len(hostPortList) == 1 {
+		host = strings.Trim(hostPortList[0], " ")
+	} else if len(hostPortList) == 2 {
+		host = strings.Trim(hostPortList[0], " ")
+		if port, err = strconv.Atoi(strings.Trim(hostPortList[1], " ")); err != nil {
+			panic("Invalid: port is invalid")
+		}
+	}
+	return
 }
 
 func TestHttpRequest(t *testing.T) {
@@ -51,10 +69,10 @@ func TestHttpRequest(t *testing.T) {
 	defer tls.Close()
 
 	var options = GetDefaultAPIOptioins()
-	options.Host = getHostFromURL(tls.URL)
+	options.Host, options.Port = getHostFromURL(tls.URL)
 	options.IsSecurity = true
 	options.StsToken = "sts_token"
-	var api = NewAPI(options)
+	var api, _ = NewAPI(options)
 
 	_, err = api.httpRequest(reqOptions)
 	fmt.Printf("%v\n", err)
@@ -65,8 +83,8 @@ func TestHttpRequest(t *testing.T) {
 	defer ts.Close()
 
 	options = GetDefaultAPIOptioins()
-	options.Host = getHostFromURL(ts.URL)
-	api = NewAPI(options)
+	options.Host, options.Port = getHostFromURL(ts.URL)
+	api, _ = NewAPI(options)
 	_, err = api.httpRequest(reqOptions)
 	fmt.Printf("%v\n", err)
 
@@ -233,25 +251,22 @@ func TestDeleteBucketReferer(t *testing.T) {
 }
 
 func TestSignURL(t *testing.T) {
-	var apiOptions = GetDefaultAPIOptioins()
 	var options = GetDefaultSignURLOptions()
-	apiOptions.IsSecurity = true
-	var api = NewAPI(apiOptions)
 	var signURL = api.SignURL(options)
 	fmt.Printf("SignURL: %s\n", signURL)
-
-	apiOptions.Host = "127.0.0.1"
-	api = NewAPI(apiOptions)
+	var apiOptions = GetDefaultAPIOptioins()
+	apiOptions.IsSecurity = true
+	var api, _ = NewAPI(apiOptions)
 	signURL = api.SignURL(options)
 	fmt.Printf("SignURL: %s\n", signURL)
 
 	apiOptions.Host = "example.com"
-	api = NewAPI(apiOptions)
+	api, _ = NewAPI(apiOptions)
 	signURL = api.SignURL(options)
 	fmt.Printf("SignURL: %s\n", signURL)
 
 	apiOptions.Host = "example.com"
-	api = NewAPI(apiOptions)
+	api, _ = NewAPI(apiOptions)
 	options.Bucket = "bucket"
 	api.SetIsOSSHost(true)
 	signURL = api.SignURL(options)

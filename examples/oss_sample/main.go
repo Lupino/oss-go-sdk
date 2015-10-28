@@ -31,9 +31,14 @@ func main() {
 	var APIOptions = oss.GetDefaultAPIOptioins()
 	APIOptions.AccessID = AccessKeyID
 	APIOptions.SecretAccessKey = AccessKeySecret
-	OSSAPI = oss.NewAPI(APIOptions)
-	var result oss.ListAllMyBucketsResult
+
 	var err error
+	OSSAPI, err = oss.NewAPI(APIOptions)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+	var result oss.ListAllMyBucketsResult
 
 	var bucket = "mainosstest"
 	var loggingBucket = "loggingbucket"

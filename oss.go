@@ -14,7 +14,7 @@
 //  var APIOptions = oss.GetDefaultAPIOptioins()
 //  APIOptions.AccessID = AccessKeyID
 //  APIOptions.SecretAccessKey = AccessKeySecret
-//  var OSSAPI = oss.NewAPI(APIOptions)
+//  var OSSAPI, err = oss.NewAPI(APIOptions)
 //
 // ## Get Service
 //
@@ -38,7 +38,9 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
+	"os"
 	"runtime"
 	"strconv"
 	"time"
@@ -56,8 +58,9 @@ func init() {
 
 // APIOptions the options of OSS API
 type APIOptions struct {
+	// The OSS server host
 	Host string
-	// Port            int
+	Port int
 	// access key you create on aliyun console website
 	AccessID string
 	// access secret you create
@@ -69,13 +72,15 @@ type APIOptions struct {
 // GetDefaultAPIOptioins get default api options for OSS API
 func GetDefaultAPIOptioins() *APIOptions {
 	return &APIOptions{
-		Host: "oss.aliyuncs.com:80",
+		Host: "oss.aliyuncs.com",
+		Port: 80,
 	}
 }
 
 // API A simple OSS API
 type API struct {
 	host            string
+	port            int
 	accessID        string
 	secretAccessKey string
 	isSecurity      bool
@@ -90,9 +95,10 @@ type API struct {
 }
 
 // NewAPI initial simple OSS API
-func NewAPI(options *APIOptions) *API {
+func NewAPI(options *APIOptions) (*API, error) {
 	var api = new(API)
-	api.host = getHostFromList(options.Host)
+	api.host = options.Host
+	api.port = options.Port
 	api.accessID = options.AccessID
 	api.secretAccessKey = options.SecretAccessKey
 	api.isSecurity = options.IsSecurity
@@ -103,7 +109,12 @@ func NewAPI(options *APIOptions) *API {
 	api.isOSSDomain = false
 	api.stsToken = options.StsToken
 	api.provider = PROVIDER
-	return api
+
+	if checkValidHost(api.host, api.port, api.timeout) {
+		return api, nil
+	}
+
+	return nil, fmt.Errorf("Server: %s:%d is not avaliable.", api.host, api.port)
 }
 
 // SetTimeout set timeout for OSS API
@@ -189,16 +200,20 @@ func (api *API) SignURL(options *SignURLOptions) string {
 	if api.isSecurity {
 		schema = "https"
 	}
+	var host = api.host
+	if api.port != 80 && api.port != 443 {
+		host = fmt.Sprintf("%s:%d", api.host, api.port)
+	}
 	if isIP(api.host) {
-		url = fmt.Sprintf("%s://%s/%s/%s", schema, api.host, options.Bucket, options.Object)
+		url = fmt.Sprintf("%s://%s/%s/%s", schema, host, options.Bucket, options.Object)
 	} else if isOSSHost(api.host, api.isOSSDomain) {
 		if checkBucketValid(options.Bucket) {
-			url = fmt.Sprintf("%s://%s.%s/%s", schema, options.Bucket, api.host, options.Object)
+			url = fmt.Sprintf("%s://%s.%s/%s", schema, options.Bucket, host, options.Object)
 		} else {
-			url = fmt.Sprintf("%s://%s/%s/%s", schema, api.host, options.Bucket, options.Object)
+			url = fmt.Sprintf("%s://%s/%s/%s", schema, host, options.Bucket, options.Object)
 		}
 	} else {
-		url = fmt.Sprintf("%s://%s/%s", schema, api.host, options.Object)
+		url = fmt.Sprintf("%s://%s/%s", schema, host, options.Object)
 	}
 	var signURL = appendParam(url, options.Params)
 	return signURL
@@ -257,9 +272,8 @@ func (api *API) httpRequest(options *requestOptions) (res *http.Response, err er
 		options.Params = make(map[string]string)
 	}
 	for i := 0; i < api.retryTimes; i++ {
-		var _, port = getHostPort(api.host)
 		var schema = "http://"
-		if api.isSecurity || port == 443 {
+		if api.isSecurity || api.port == 443 {
 			api.isSecurity = true
 			schema = "https://"
 		}
@@ -300,6 +314,11 @@ func (api *API) httpRequest(options *requestOptions) (res *http.Response, err er
 			host = options.Headers["Host"]
 		} else {
 			host = api.host
+		}
+
+		if api.port != 80 && api.port != 443 {
+			options.Headers["Host"] = fmt.Sprintf("%s:%s", options.Headers["Host"], api.port)
+			host = fmt.Sprintf("%s:%d", host, api.port)
 		}
 
 		if req, err = http.NewRequest(options.Method, schema+host+url, options.Body); err != nil {

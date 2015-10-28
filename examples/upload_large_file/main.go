@@ -17,13 +17,16 @@ func main() {
 	var APIOptions = oss.GetDefaultAPIOptioins()
 	APIOptions.AccessID = AccessKeyID
 	APIOptions.SecretAccessKey = AccessKeySecret
-	var OSSAPI = oss.NewAPI(APIOptions)
+	var OSSAPI, err = oss.NewAPI(APIOptions)
+
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	var bucket = "ossgosdklargefile"
 	var object = "largefile.bin"
 	var bufSize = int64(1024 * 1024 * 2) // 2 M
 	var file = "test.bin"
-	var err error
 	var fp *os.File
 
 	if err = OSSAPI.PutBucket(bucket, oss.ACLPublicReadWrite, nil, nil); err != nil {

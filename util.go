@@ -14,6 +14,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 )
 
 // PROVIDER defined provider
@@ -37,38 +38,13 @@ const (
 // OSSHostList defined OSS host list
 var OSSHostList = []string{"aliyun-inc.com", "aliyuncs.com", "alibaba.net", "s3.amazonaws.com"}
 
-func getHostFromList(hosts string) string {
-	var tmpList = strings.Split(hosts, ",")
-	var host string
-	var port int
-	if len(tmpList) <= 1 {
-		host, port = getHostPort(hosts)
-		return fmt.Sprintf("%s:%d", host, port)
+func checkValidHost(host string, port int, timeout time.Duration) bool {
+	var addr = fmt.Sprintf("%s:%d", host, port)
+	if _, err := net.DialTimeout("tcp", addr, timeout); err == nil {
+		return true
 	}
-	for _, tmpHost := range tmpList {
-		host, port = getHostPort(tmpHost)
-		if _, err := net.Dial("tcp", fmt.Sprintf("%s:%d", host, port)); err == nil {
-			return fmt.Sprintf("%s:%d", host, port)
-		}
-	}
-	host, port = getHostPort(tmpList[0])
-	return fmt.Sprintf("%s:%d", host, port)
-}
 
-func getHostPort(origHost string) (host string, port int) {
-	host = origHost
-	port = 80
-	var hostPortList = strings.SplitN(origHost, ":", 2)
-	var err error
-	if len(hostPortList) == 1 {
-		host = strings.Trim(hostPortList[0], " ")
-	} else if len(hostPortList) == 2 {
-		host = strings.Trim(hostPortList[0], " ")
-		if port, err = strconv.Atoi(strings.Trim(hostPortList[1], " ")); err != nil {
-			panic("Invalid: port is invalid")
-		}
-	}
-	return
+	return false
 }
 
 func isOSSHost(host string, isOSSHost bool) bool {
@@ -190,8 +166,7 @@ func quote(str string) string {
 	return url.QueryEscape(str)
 }
 
-func isIP(s string) bool {
-	var host, _ = getHostPort(s)
+func isIP(host string) bool {
 	if host == "localhost" {
 		return true
 	}

@@ -23,11 +23,14 @@ func main() {
 	var APIOptions = oss.GetDefaultAPIOptioins()
 	APIOptions.AccessID = AccessKeyID
 	APIOptions.SecretAccessKey = AccessKeySecret
-	var OSSAPI = oss.NewAPI(APIOptions)
+	var OSSAPI, err = oss.NewAPI(APIOptions)
+
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	var bucket = "ossgosdknotebook"
 	var bookName = "notebook.txt"
-	var err error
 
 	if err = OSSAPI.PutBucket(bucket, oss.ACLPrivate, nil, nil); err != nil {
 		log.Printf("%v\n", err)
