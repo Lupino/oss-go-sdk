@@ -50,11 +50,11 @@ err = OSSAPI.GetService(&result, headers)
 
 ## Parse the error
 
-`oss-go-sdk` store the error xml return by OSS into the func `error`,
-if you want to see what error return from OSS just parse it.
+`oss-go-sdk` implement error return by OSS into `error` interface by `oss.Error`,
+so you can get error return by OSS server from `oss.Error`, just like:
 
 ```go
-var e = oss.ParseError(err)
+var realErr = err.(*oss.Error)
 ```
 
 ## The end

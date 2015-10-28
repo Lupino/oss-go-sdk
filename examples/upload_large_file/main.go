@@ -27,14 +27,12 @@ func main() {
 	var fp *os.File
 
 	if err = OSSAPI.PutBucket(bucket, oss.ACLPublicReadWrite, nil, nil); err != nil {
-		var e = oss.ParseError(err)
-		log.Printf("Code: %s\nMessage: %s\n", e.Code, e.Message)
+		log.Printf("%s\n", err)
 	}
 
 	var multi *oss.MultipartUpload
 	if multi, err = OSSAPI.NewMultipartUpload(bucket, object, nil); err != nil {
-		var e = oss.ParseError(err)
-		log.Printf("Code: %s\nMessage: %s\n", e.Code, e.Message)
+		log.Printf("%s\n", err)
 	}
 
 	if fp, err = os.Open(file); err != nil {
@@ -55,8 +53,7 @@ func main() {
 	for i := 1; i <= filePart; i++ {
 		rd = io.LimitReader(fp, bufSize)
 		if etag, err = multi.UploadPart(i, rd); err != nil {
-			var e = oss.ParseError(err)
-			log.Printf("Code: %s\nMessage: %s\n", e.Code, e.Message)
+			log.Printf("%s\n", err)
 		}
 		log.Printf("PartNumber: %d, ETag: %s\n", i, etag)
 		parts[i-1] = oss.Part{
@@ -68,8 +65,7 @@ func main() {
 	var result oss.CompleteMultipartUploadResult
 
 	if err = multi.CompleteUpload(parts, &result); err != nil {
-		var e = oss.ParseError(err)
-		log.Printf("Code: %s\nMessage: %s\n", e.Code, e.Message)
+		log.Printf("%s\n", err)
 	}
 
 	log.Printf("Upload result: %s\n", result)

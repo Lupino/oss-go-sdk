@@ -5,7 +5,6 @@ import (
 	"crypto/md5"
 	"crypto/sha1"
 	"encoding/base64"
-	"encoding/xml"
 	"fmt"
 	"io"
 	"log"
@@ -256,11 +255,4 @@ func getBase64MD5WithReader(reader io.Reader) string {
 	h := md5.New()
 	io.Copy(h, reader)
 	return base64.StdEncoding.EncodeToString(h.Sum(nil))
-}
-
-// ParseError parse the error return by OSS server
-func ParseError(err error) (e Error) {
-	var data = []byte(err.Error())
-	xml.Unmarshal(data, &e)
-	return
 }

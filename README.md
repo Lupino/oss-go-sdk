@@ -49,10 +49,11 @@ err = OSSAPI.GetService(&result, headers)
 
 ## Parse the error
 
-all the error is the error xml so you shoud parse the error and see the error message.
+`oss-go-sdk` implement error return by OSS into `error` interface by `oss.Error`,
+so you can get error return by OSS server from `oss.Error`, just like:
 
 ```go
-var e = oss.ParseError(err)
+var realErr = err.(*oss.Error)
 ```
 
 ## Tutorial

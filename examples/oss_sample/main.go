@@ -40,78 +40,67 @@ func main() {
 
 	log.Println("GetService from oss server")
 	if err = OSSAPI.GetService(&result, nil); err != nil {
-		var e = oss.ParseError(err)
-		log.Printf("GetService Error: %s\n", e)
+		log.Printf("GetService Error: %s\n", err)
 	}
 	log.Printf("GetService result: %s\n", result.Buckets)
 
 	log.Println("PutBucket")
 	if err = OSSAPI.PutBucket(bucket, oss.ACLPublicReadWrite, nil, nil); err != nil {
-		var e = oss.ParseError(err)
-		log.Printf("PutBucket Error: %s\n", e)
+		log.Printf("PutBucket Error: %s\n", err)
 	}
 
 	log.Println("PutBucket")
 	if err = OSSAPI.PutBucket(loggingBucket, oss.ACLPublicReadWrite, nil, nil); err != nil {
-		var e = oss.ParseError(err)
-		log.Printf("PutBucket Error: %s\n", e)
+		log.Printf("PutBucket Error: %s\n", err)
 	}
 
 	log.Println("GetBucket")
 	var result1 oss.ListBucketResult
 	if err = OSSAPI.GetBucket(bucket, &result1, nil); err != nil {
-		var e = oss.ParseError(err)
-		log.Printf("GetBucket Error: %s\n", e)
+		log.Printf("GetBucket Error: %s\n", err)
 	}
 	log.Printf("GetBucket result: %s\n", result1.Name)
 
 	log.Printf("PutBucketACL")
 	if err = OSSAPI.PutBucketACL(bucket, oss.ACLPublicReadWrite, nil); err != nil {
-		var e = oss.ParseError(err)
-		log.Printf("PutBucketACL Error: %s\n", e)
+		log.Printf("PutBucketACL Error: %s\n", err)
 	}
 
 	log.Println("GetBucketACL")
 	var result2 oss.AccessControlPolicy
 	if err = OSSAPI.GetBucketACL(bucket, &result2); err != nil {
-		var e = oss.ParseError(err)
-		log.Printf("GetBucketACL Error: %s\n", e)
+		log.Printf("GetBucketACL Error: %s\n", err)
 	}
 	log.Printf("GetBucketACL result: %s\n", result2.AccessControlList)
 
 	var result4 oss.LocationConstraint
 	log.Println("GetBucketLocation")
 	if err = OSSAPI.GetBucketLocation(bucket, &result4); err != nil {
-		var e = oss.ParseError(err)
-		log.Printf("GetBucketLocation Error: %s\n", e)
+		log.Printf("GetBucketLocation Error: %s\n", err)
 	}
 	log.Printf("GetBucketLocation result: %s\n", result4)
 
 	log.Printf("PutBucketLogging")
 	if err = OSSAPI.PutBucketLogging(bucket, loggingBucket, "bucket.log"); err != nil {
-		var e = oss.ParseError(err)
-		log.Printf("PutBucketLogging Error: %s\n", e)
+		log.Printf("PutBucketLogging Error: %s\n", err)
 	}
 
 	log.Println("GetBucketLogging")
 	var result5 oss.BucketLoggingStatus
 	if err = OSSAPI.GetBucketLogging(bucket, &result5); err != nil {
-		var e = oss.ParseError(err)
-		log.Printf("GetBucketLogging Error: %s\n", e)
+		log.Printf("GetBucketLogging Error: %s\n", err)
 	}
 	log.Printf("GetBucketLogging result: %s\n", result5)
 
 	log.Printf("PutBucketWebsite")
 	if err = OSSAPI.PutBucketWebsite(bucket, "index.html", "error.html"); err != nil {
-		var e = oss.ParseError(err)
-		log.Printf("PutBucketWebsite Error: %s\n", e)
+		log.Printf("PutBucketWebsite Error: %s\n", err)
 	}
 
 	log.Println("GetBucketWebsite")
 	var result3 oss.WebsiteConfiguration
 	if err = OSSAPI.GetBucketWebsite(bucket, &result3); err != nil {
-		var e = oss.ParseError(err)
-		log.Printf("GetBucketWebsite Error: %s\n", e)
+		log.Printf("GetBucketWebsite Error: %s\n", err)
 	}
 	log.Printf("GetBucketWebsite result: %s\n", result3)
 
@@ -121,15 +110,13 @@ func main() {
 		RefererList:       []string{"http://test.com", "http://example.com"},
 	}
 	if err := OSSAPI.PutBucketReferer(bucket, refererConfig); err != nil {
-		var e = oss.ParseError(err)
-		log.Printf("PutBucketReferer Error: %s\n", e)
+		log.Printf("PutBucketReferer Error: %s\n", err)
 	}
 
 	log.Println("GetBucketReferer")
 	var result6 oss.RefererConfiguration
 	if err = OSSAPI.GetBucketReferer(bucket, &result6); err != nil {
-		var e = oss.ParseError(err)
-		log.Printf("GetBucketReferer Error: %s\n", e)
+		log.Printf("GetBucketReferer Error: %s\n", err)
 	}
 	log.Printf("GetBucketReferer result: %s\n", result6)
 
@@ -141,34 +128,29 @@ func main() {
 		ExpirationDays: 1,
 	}
 	if err = OSSAPI.PutBucketLifecycle(bucket, lcRule); err != nil {
-		var e = oss.ParseError(err)
-		log.Printf("PutBucketLifecycle Error: %s\n", e)
+		log.Printf("PutBucketLifecycle Error: %s\n", err)
 	}
 
 	log.Printf("GetBucketLifecycle")
 	var result7 oss.LifecycleConfiguration
 	if err = OSSAPI.GetBucketLifecycle(bucket, &result7); err != nil {
-		var e = oss.ParseError(err)
-		log.Printf("GetBucketLifecycle Error: %s\n", e)
+		log.Printf("GetBucketLifecycle Error: %s\n", err)
 	}
 	log.Printf("GetBucketLifecycle result: %s\n", result7)
 
 	log.Println("DeleteBucketLogging")
 	if err = OSSAPI.DeleteBucketLogging(bucket); err != nil {
-		var e = oss.ParseError(err)
-		log.Printf("DeleteBucketLogging Error: %s\n", e)
+		log.Printf("DeleteBucketLogging Error: %s\n", err)
 	}
 
 	log.Println("DeleteBucketWebsite")
 	if err = OSSAPI.DeleteBucketWebsite(bucket); err != nil {
-		var e = oss.ParseError(err)
-		log.Printf("DeleteBucketWebsite Error: %s\n", e)
+		log.Printf("DeleteBucketWebsite Error: %s\n", err)
 	}
 
 	log.Println("DeleteBucketLifecycle")
 	if err = OSSAPI.DeleteBucketLifecycle(bucket); err != nil {
-		var e = oss.ParseError(err)
-		log.Printf("DeleteBucketLifecycle Error: %s\n", e)
+		log.Printf("DeleteBucketLifecycle Error: %s\n", err)
 	}
 	////////////////////////////////////////////////////////////////////////////
 
@@ -180,8 +162,7 @@ func main() {
 
 	log.Println("PutObject")
 	if err = OSSAPI.PutObject(bucket, object, bufio.NewReader(body), headers); err != nil {
-		var e = oss.ParseError(err)
-		log.Printf("PutObject Error: %s\n", e)
+		log.Printf("PutObject Error: %s\n", err)
 	}
 
 	log.Println("PutObject")
@@ -190,53 +171,47 @@ func main() {
 		log.Fatal(err)
 	}
 	if err = OSSAPI.PostObject(bucket, object, fp, headers); err != nil {
-		var e = oss.ParseError(err)
-		log.Printf("PutObject Error: %s\n", e)
+		log.Printf("PutObject Error: %s\n", err)
 	}
 
 	log.Println("GetObject")
 	var data io.ReadCloser
 	if data, err = OSSAPI.GetObject(bucket, object, nil, nil); err != nil {
-		var e = oss.ParseError(err)
-		log.Printf("GetObject Error: %s\n", e)
+		log.Printf("GetObject Error: %s\n", err)
+	} else {
+		defer data.Close()
+		var buf, _ = ioutil.ReadAll(data)
+		log.Printf("GetObject result: the data length is: %d\n", len(buf))
 	}
-	defer data.Close()
-	var buf, _ = ioutil.ReadAll(data)
-	log.Printf("GetObject result: the data length is: %d\n", len(buf))
 
 	log.Println("PutObjectACL")
 	if err = OSSAPI.PutObjectACL(bucket, object, "public-read"); err != nil {
-		var e = oss.ParseError(err)
-		log.Printf("PutObjectACL Error: %s\n", e)
+		log.Printf("PutObjectACL Error: %s\n", err)
 	}
 
 	log.Println("GetObjectACL")
 	var acl oss.AccessControlPolicy
 	if err = OSSAPI.GetObjectACL(bucket, object, &acl); err != nil {
-		var e = oss.ParseError(err)
-		log.Printf("GetObjectACL Error: %s\n", e)
+		log.Printf("GetObjectACL Error: %s\n", err)
 	}
 	log.Printf("GetObjectACL result: %s\n", acl.AccessControlList)
 
 	log.Println("HeadObject")
 	var headResult http.Header
 	if headResult, err = OSSAPI.HeadObject(bucket, object, nil); err != nil {
-		var e = oss.ParseError(err)
-		log.Printf("HeadObject Error: %s\n", e)
+		log.Printf("HeadObject Error: %s\n", err)
 	}
 	log.Printf("HeadObject result: %s\n", headResult)
 
 	log.Println("DeleteObject")
 	if err = OSSAPI.DeleteObject(bucket, object); err != nil {
-		var e = oss.ParseError(err)
-		log.Printf("DeleteObject Error: %s\n", e)
+		log.Printf("DeleteObject Error: %s\n", err)
 	}
 
 	log.Println("DeleteObjects")
 	var deleteResult oss.DeleteResult
 	if err = OSSAPI.DeleteObjects(bucket, []string{"object1", "object2"}, &deleteResult); err != nil {
-		var e = oss.ParseError(err)
-		log.Printf("DeleteObjects Error: %s\n", e)
+		log.Printf("DeleteObjects Error: %s\n", err)
 	}
 	log.Printf("DeleteObjects result: %s\n", deleteResult)
 
@@ -246,8 +221,7 @@ func main() {
 	var etag http.Header
 	body = bytes.NewBufferString("this is the body")
 	if etag, err = OSSAPI.AppendObject(bucket, appendObject, 0, bufio.NewReader(body), headers); err != nil {
-		var e = oss.ParseError(err)
-		log.Printf("AppendObject Error: %s\n", e)
+		log.Printf("AppendObject Error: %s\n", err)
 	}
 	log.Printf("AppendObject result: %s\n", etag)
 
@@ -257,21 +231,18 @@ func main() {
 		log.Fatal(err)
 	}
 	if etag, err = OSSAPI.AppendObject(bucket, appendObject, 1, fp, headers); err != nil {
-		var e = oss.ParseError(err)
-		log.Printf("AppendObject Error: %s\n", e)
+		log.Printf("AppendObject Error: %s\n", err)
 	}
 	log.Printf("AppendObject result: %s\n", etag)
 
 	log.Println("CopyObject")
 	if _, err = OSSAPI.CopyObject(bucket, appendObject, bucket, appendObject1, headers); err != nil {
-		var e = oss.ParseError(err)
-		log.Printf("CopyObject Error: %s\n", e)
+		log.Printf("CopyObject Error: %s\n", err)
 	}
 
 	log.Println("DeleteObjects")
 	if err = OSSAPI.DeleteObjects(bucket, []string{appendObject, appendObject1}, &deleteResult); err != nil {
-		var e = oss.ParseError(err)
-		log.Printf("DeleteObjects Error: %s\n", e)
+		log.Printf("DeleteObjects Error: %s\n", err)
 	}
 	log.Printf("DeleteObjects result: %s\n", deleteResult)
 
@@ -279,14 +250,12 @@ func main() {
 
 	log.Println("DeleteBucket")
 	if err = OSSAPI.DeleteBucket(bucket); err != nil {
-		var e = oss.ParseError(err)
-		log.Printf("DeleteBucket Error: %s\n", e)
+		log.Printf("DeleteBucket Error: %s\n", err)
 	}
 
 	log.Println("DeleteBucket")
 	if err = OSSAPI.DeleteBucket(loggingBucket); err != nil {
-		var e = oss.ParseError(err)
-		log.Printf("DeleteBucket Error: %s\n", e)
+		log.Printf("DeleteBucket Error: %s\n", err)
 	}
 
 }

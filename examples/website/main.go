@@ -22,13 +22,11 @@ func main() {
 	var err error
 
 	if err = OSSAPI.PutBucket(bucket, oss.ACLPublicReadWrite, nil, nil); err != nil {
-		var e = oss.ParseError(err)
-		log.Printf("Code: %s\nMessage: %s\n", e.Code, e.Message)
+		log.Printf("%s\n", err)
 	}
 
 	if err = OSSAPI.PutBucketWebsite(bucket, "index.html", "error.html"); err != nil {
-		var e = oss.ParseError(err)
-		log.Printf("Code: %s\nMessage: %s\n", e.Code, e.Message)
+		log.Printf("%s\n", err)
 	}
 
 	upload(OSSAPI, bucket, "index.html")
@@ -49,7 +47,6 @@ func upload(OSSAPI *oss.API, bucket, filename string) {
 	headers["Content-Type"] = "text/html"
 
 	if err = OSSAPI.PutObject(bucket, filename, fp, headers); err != nil {
-		var e = oss.ParseError(err)
-		log.Printf("Code: %s\nMessage: %s\n", e.Code, e.Message)
+		log.Printf("%s\n", err)
 	}
 }

@@ -25,16 +25,16 @@
 //
 // ## Parse the error
 //
-// all the error is the error xml so you shoud parse the error and see the error message.
+// `oss-go-sdk` implement error return by OSS into `error` interface by `oss.Error`,
+// so you can get error return by OSS server from `oss.Error`, just like:
 //
-//  var e = oss.ParseError(err)
+//  var realErr = err.(*oss.Error)
 //
 package oss
 
 import (
 	"bytes"
 	"encoding/xml"
-	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -320,7 +320,7 @@ func (api *API) httpRequest(options *requestOptions) (res *http.Response, err er
 		if res.StatusCode/100 != 2 {
 			var errStr, _ = ioutil.ReadAll(res.Body)
 			res.Body.Close()
-			err = errors.New(string(errStr))
+			err = ParseError(errStr)
 		} else if options.AutoClose {
 			res.Body.Close()
 		}

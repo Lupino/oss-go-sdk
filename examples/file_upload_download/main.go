@@ -23,8 +23,7 @@ func main() {
 	var err error
 
 	if err = OSSAPI.PutBucket(bucket, oss.ACLPublicReadWrite, nil, nil); err != nil {
-		var e = oss.ParseError(err)
-		log.Printf("Code: %s\nMessage: %s\n", e.Code, e.Message)
+		log.Printf("%v\n", err)
 	}
 
 	upload(OSSAPI, bucket, "test.jpg", "image/jpeg")
@@ -44,8 +43,7 @@ func upload(OSSAPI *oss.API, bucket, filename, contentType string) {
 	headers["Content-Type"] = contentType
 
 	if err = OSSAPI.PutObject(bucket, filename, fp, headers); err != nil {
-		var e = oss.ParseError(err)
-		log.Printf("Code: %s\nMessage: %s\n", e.Code, e.Message)
+		log.Printf("%v\n", err)
 	}
 }
 

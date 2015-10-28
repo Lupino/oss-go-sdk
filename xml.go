@@ -93,20 +93,6 @@ type WebsiteConfiguration struct {
 	ErrorKey    string   `xml:"ErrorDocument>Key"`
 }
 
-// Error Each error return by OSS server
-type Error struct {
-	XMLName xml.Name `xml:"Error"`
-	// error name
-	Code string
-	// error message
-	Message    string
-	BucketName string
-	// uuid for this request, if you meet some unhandled problem, you can send this request id to OSS engineer to find out what's happend.
-	RequestID string `xml:"RequestId"`
-	// OSS cluster name for this request
-	HostID string `xml:"HostId"`
-}
-
 // RefererConfiguration defined referer configuration
 type RefererConfiguration struct {
 	XMLName           xml.Name `xml:"RefererConfiguration"`

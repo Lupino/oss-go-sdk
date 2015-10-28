@@ -30,8 +30,7 @@ func main() {
 	var err error
 
 	if err = OSSAPI.PutBucket(bucket, oss.ACLPrivate, nil, nil); err != nil {
-		var e = oss.ParseError(err)
-		log.Printf("Code: %s\nMessage: %s\n", e.Code, e.Message)
+		log.Printf("%v\n", err)
 	}
 
 	var args = os.Args
@@ -62,8 +61,7 @@ func addLine(OSSAPI *oss.API, bucket, bookName, line string) {
 	}
 
 	if _, err = OSSAPI.AppendObject(bucket, bookName, contentLength, buf, headers); err != nil {
-		var e = oss.ParseError(err)
-		log.Printf("Code: %s\nMessage: %s\n", e.Code, e.Message)
+		log.Printf("%v\n", err)
 	}
 }
 
@@ -72,8 +70,8 @@ func readNotebook(OSSAPI *oss.API, bucket, bookName string) {
 	var err error
 
 	if reader, err = OSSAPI.GetObject(bucket, bookName, nil, nil); err != nil {
-		var e = oss.ParseError(err)
-		log.Printf("Code: %s\nMessage: %s\n", e.Code, e.Message)
+		log.Printf("%v\n", err)
+		return
 	}
 	defer reader.Close()
 	var data, _ = ioutil.ReadAll(reader)
