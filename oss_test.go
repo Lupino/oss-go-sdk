@@ -489,3 +489,14 @@ func TestBucketCORSAPI(t *testing.T) {
 		t.Fatal("need fail, but success")
 	}
 }
+
+func TestUploadLargeFile(t *testing.T) {
+	res, _ := http.Get("https://huabot.b0.upaiyun.com/tweet/2681545d58a63be82851ad59b49461ecaa9d1555")
+	defer res.Body.Close()
+	var fileName = "/tmp/oss-go-sdk-test.png"
+	var fp, _ = os.Create(fileName)
+	io.Copy(fp, res.Body)
+	fp.Close()
+	api.SetDebug()
+	api.UploadLargeFile("bucket", "object", fileName, 1024*101, nil)
+}

@@ -1021,3 +1021,68 @@ func (api *API) OptionObject(bucket, object string, headers map[string]string) (
 	}
 	return res.Header, nil
 }
+
+// UploadLargeFile upload a large file by multipart upload api
+func (api *API) UploadLargeFile(bucket, object, fileName string, bufSize int64,
+	headers map[string]string) (result CompleteMultipartUploadResult, err error) {
+
+	if bufSize < 1024*100 {
+		err = fmt.Errorf("bufSize must big than %d", 1024*100)
+		return
+	}
+
+	var fp *os.File
+	if fp, err = os.Open(fileName); err != nil {
+		return
+	}
+
+	defer fp.Close()
+
+	var stat, _ = fp.Stat()
+	var fileSize = stat.Size()
+	if fileSize <= bufSize {
+		err = fmt.Errorf("need a large file, and it's size big than %d\n", bufSize)
+		return
+	}
+	var filePart = int(fileSize / bufSize)
+	if int64(filePart)*bufSize < fileSize {
+		filePart = filePart + 1
+	}
+
+	if api.debug {
+		log.Printf("Upload large file: %s\ntotal part: %d\n", fileName, filePart)
+	}
+
+	var rd io.Reader
+	var parts = make([]Part, filePart)
+	var etag string
+	var uploadFailed = false
+
+	var multi *MultipartUpload
+	if multi, err = api.NewMultipartUpload(bucket, object, headers); err != nil {
+		return
+	}
+
+	for i := 1; i <= filePart; i++ {
+		rd = io.LimitReader(fp, bufSize)
+		if etag, err = multi.UploadPart(i, rd); err != nil {
+			uploadFailed = true
+			break
+		}
+		if api.debug {
+			log.Printf("PartNumber: %d, ETag: %s\n", i, etag)
+		}
+		parts[i-1] = Part{
+			PartNumber: i,
+			ETag:       etag,
+		}
+	}
+
+	if uploadFailed {
+		err = multi.AbortUpload()
+	} else {
+		err = multi.CompleteUpload(parts, &result)
+	}
+
+	return
+}
