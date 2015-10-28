@@ -26,8 +26,8 @@ func (e *Error) Error() string {
 	return e.Message
 }
 
-// ParseError parse the error return by OSS server
-func ParseError(errStr []byte) *Error {
+// parseError parse the error return by OSS server
+func parseError(errStr []byte) *Error {
 	var err Error
 	xml.Unmarshal(errStr, &err)
 	err.Raw = errStr

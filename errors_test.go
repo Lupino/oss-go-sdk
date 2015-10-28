@@ -24,7 +24,7 @@ func TestParseError(t *testing.T) {
         </HostId>
 </Error>`)
 
-	var e = ParseError(err)
+	var e = parseError(err)
 	if e.Code != "InvalidArgument" {
 		t.Fatalf("ParseError: except: %s, but got: %s\n", "InvalidArgument", e.Code)
 	}

@@ -320,7 +320,7 @@ func (api *API) httpRequest(options *requestOptions) (res *http.Response, err er
 		if res.StatusCode/100 != 2 {
 			var errStr, _ = ioutil.ReadAll(res.Body)
 			res.Body.Close()
-			err = ParseError(errStr)
+			err = parseError(errStr)
 		} else if options.AutoClose {
 			res.Body.Close()
 		}
