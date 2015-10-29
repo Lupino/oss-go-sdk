@@ -167,7 +167,7 @@ func GetDefaultSignURLOptions() *SignURLOptions {
 	return options
 }
 
-// SignURLAuthWithExpireTime Create the authorization for OSS based on the input method, url, body and headers
+// SignURLAuthWithExpireTime create the authorization for OSS based on the input method, url, body and headers
 //
 // Returns:
 //     signature url.
@@ -183,7 +183,7 @@ func (api *API) SignURLAuthWithExpireTime(options *SignURLOptions) string {
 	return signURL
 }
 
-// SignURL Create the authorization for OSS based on the input method, url, body and headers
+// SignURL create the authorization for OSS based on the input method, url, body and headers
 //
 // Returns:
 //     signature url.
@@ -260,7 +260,7 @@ func getDefaultRequestOptions() *requestOptions {
 	return options
 }
 
-// httpRequest Send http request of operation
+// httpRequest send http request of operation
 func (api *API) httpRequest(options *requestOptions) (res *http.Response, err error) {
 
 	var req *http.Request
@@ -349,7 +349,7 @@ func (api *API) httpRequest(options *requestOptions) (res *http.Response, err er
 	return
 }
 
-// httpRequestWithUnmarshalXML http request and xml unmarshal
+// httpRequestWithUnmarshalXML get http request and xml unmarshal
 func (api *API) httpRequestWithUnmarshalXML(options *requestOptions, result interface{}) error {
 	var data []byte
 	var err error
@@ -372,12 +372,12 @@ func (api *API) httpRequestWithUnmarshalXML(options *requestOptions, result inte
 	return nil
 }
 
-// GetService List all buckets of user
+// GetService list all buckets of user
 func (api *API) GetService(result *ListAllMyBucketsResult, headers map[string]string) error {
 	return api.ListAllMyBuckets(result, headers)
 }
 
-// ListAllMyBuckets List all buckets of user
+// ListAllMyBuckets list all buckets of user
 func (api *API) ListAllMyBuckets(result *ListAllMyBucketsResult, headers map[string]string) error {
 	var options = getDefaultRequestOptions()
 	if result.Prefix != "" {
@@ -401,7 +401,7 @@ func (api *API) GetBucketACL(bucket string, result *AccessControlPolicy) error {
 	return api.httpRequestWithUnmarshalXML(options, result)
 }
 
-// GetBucketLocation Get Location of bucket
+// GetBucketLocation get Location of bucket
 func (api *API) GetBucketLocation(bucket string, result *LocationConstraint) error {
 	var options = getDefaultRequestOptions()
 	options.Bucket = bucket
@@ -409,12 +409,12 @@ func (api *API) GetBucketLocation(bucket string, result *LocationConstraint) err
 	return api.httpRequestWithUnmarshalXML(options, result)
 }
 
-// GetBucket List object that in bucket
+// GetBucket list object that in bucket
 func (api *API) GetBucket(bucket string, result *ListBucketResult, headers map[string]string) error {
 	return api.ListBucket(bucket, result, headers)
 }
 
-// ListBucket List object that in bucket
+// ListBucket list object that in bucket
 func (api *API) ListBucket(bucket string, result *ListBucketResult, headers map[string]string) error {
 	var options = getDefaultRequestOptions()
 	options.Bucket = bucket
@@ -428,7 +428,7 @@ func (api *API) ListBucket(bucket string, result *ListBucketResult, headers map[
 	return api.httpRequestWithUnmarshalXML(options, result)
 }
 
-// GetBucketWebsite Get bucket website config.
+// GetBucketWebsite get bucket website config.
 func (api *API) GetBucketWebsite(bucket string, result *WebsiteConfiguration) error {
 	var options = getDefaultRequestOptions()
 	options.Bucket = bucket
@@ -436,7 +436,7 @@ func (api *API) GetBucketWebsite(bucket string, result *WebsiteConfiguration) er
 	return api.httpRequestWithUnmarshalXML(options, result)
 }
 
-// GetBucketReferer Get the bucket request Referer white list.
+// GetBucketReferer get the bucket request Referer white list.
 func (api *API) GetBucketReferer(bucket string, result *RefererConfiguration) error {
 	var options = getDefaultRequestOptions()
 	options.Bucket = bucket
@@ -444,7 +444,7 @@ func (api *API) GetBucketReferer(bucket string, result *RefererConfiguration) er
 	return api.httpRequestWithUnmarshalXML(options, result)
 }
 
-// GetBucketLifecycle Get bucket lifecycle
+// GetBucketLifecycle get bucket lifecycle
 func (api *API) GetBucketLifecycle(bucket string, result *LifecycleConfiguration) error {
 	var options = getDefaultRequestOptions()
 	options.Bucket = bucket
@@ -452,7 +452,7 @@ func (api *API) GetBucketLifecycle(bucket string, result *LifecycleConfiguration
 	return api.httpRequestWithUnmarshalXML(options, result)
 }
 
-// GetBucketLogging Get bucket logging settings
+// GetBucketLogging get bucket logging settings
 func (api *API) GetBucketLogging(bucket string, result *BucketLoggingStatus) error {
 	var options = getDefaultRequestOptions()
 	options.Bucket = bucket
@@ -502,7 +502,7 @@ func (api *API) PutBucketACL(bucket string, acl ACLGrant, headers map[string]str
 	return api.httpRequestWithUnmarshalXML(options, nil)
 }
 
-// PutBucketLogging Update the bucket logging settings.
+// PutBucketLogging update the bucket logging settings.
 // Log file will create every one hour and name format: <prefix><bucket>-YYYY-mm-DD-HH-MM-SS-UniqueString.
 func (api *API) PutBucketLogging(sourcebucket, targetbucket, prefix string) error {
 	var options = getDefaultRequestOptions()
@@ -518,7 +518,7 @@ func (api *API) PutBucketLogging(sourcebucket, targetbucket, prefix string) erro
 	return api.httpRequestWithUnmarshalXML(options, nil)
 }
 
-// PutBucketWebsite Set the bucket as a static website.
+// PutBucketWebsite set the bucket as a static website.
 //
 //      - indexfile: the object that contain index page
 //      - errorfile: the object taht contain error page
@@ -536,7 +536,7 @@ func (api *API) PutBucketWebsite(bucket, indexfile, errorfile string) error {
 	return api.httpRequestWithUnmarshalXML(options, nil)
 }
 
-// PutBucketLifecycle Set the bucket object lifecycle.
+// PutBucketLifecycle set the bucket object lifecycle.
 func (api *API) PutBucketLifecycle(bucket string, rule LifecycleRule) error {
 	var options = getDefaultRequestOptions()
 	options.Method = "PUT"
@@ -550,7 +550,7 @@ func (api *API) PutBucketLifecycle(bucket string, rule LifecycleRule) error {
 	return api.httpRequestWithUnmarshalXML(options, nil)
 }
 
-// PutBucketReferer Set the bucket request Referer white list.
+// PutBucketReferer set the bucket request Referer white list.
 func (api *API) PutBucketReferer(bucket string, config RefererConfiguration) error {
 	var options = getDefaultRequestOptions()
 	options.Method = "PUT"
@@ -563,7 +563,7 @@ func (api *API) PutBucketReferer(bucket string, config RefererConfiguration) err
 	return api.httpRequestWithUnmarshalXML(options, nil)
 }
 
-// DeleteBucket Delete an empty bucket.
+// DeleteBucket delete an empty bucket.
 // If bucket is not empty, will throw BucketNotEmptyError. If bucket is not exists, will throw NoSuchBucketError.
 func (api *API) DeleteBucket(bucket string) error {
 	var options = getDefaultRequestOptions()
@@ -572,7 +572,7 @@ func (api *API) DeleteBucket(bucket string) error {
 	return api.httpRequestWithUnmarshalXML(options, nil)
 }
 
-// DeleteBucketWebsite Delete bucket website config
+// DeleteBucketWebsite delete bucket website config
 func (api *API) DeleteBucketWebsite(bucket string) error {
 	var options = getDefaultRequestOptions()
 	options.Method = "DELETE"
@@ -581,7 +581,7 @@ func (api *API) DeleteBucketWebsite(bucket string) error {
 	return api.httpRequestWithUnmarshalXML(options, nil)
 }
 
-// DeleteBucketLifecycle Delete bucket object lifecycle
+// DeleteBucketLifecycle delete bucket object lifecycle
 func (api *API) DeleteBucketLifecycle(bucket string) error {
 	var options = getDefaultRequestOptions()
 	options.Method = "DELETE"
@@ -590,7 +590,7 @@ func (api *API) DeleteBucketLifecycle(bucket string) error {
 	return api.httpRequestWithUnmarshalXML(options, nil)
 }
 
-// DeleteBucketLogging Delete bucket logging settings
+// DeleteBucketLogging delete bucket logging settings
 func (api *API) DeleteBucketLogging(bucket string) error {
 	var options = getDefaultRequestOptions()
 	options.Method = "DELETE"
@@ -599,7 +599,7 @@ func (api *API) DeleteBucketLogging(bucket string) error {
 	return api.httpRequestWithUnmarshalXML(options, nil)
 }
 
-// DeleteBucketReferer Delete the bucket request Referer white list.
+// DeleteBucketReferer delete the bucket request Referer white list.
 func (api *API) DeleteBucketReferer(bucket string) error {
 	var options = getDefaultRequestOptions()
 	options.Method = "DELETE"
@@ -608,7 +608,7 @@ func (api *API) DeleteBucketReferer(bucket string) error {
 	return api.httpRequestWithUnmarshalXML(options, nil)
 }
 
-// GetObject Get an object from the bucket.
+// GetObject get an object from the bucket.
 func (api *API) GetObject(bucket, object string, headers, params map[string]string) (io.ReadCloser, error) {
 	var options = getDefaultRequestOptions()
 	options.Bucket = bucket
@@ -634,7 +634,7 @@ func (api *API) GetObjectACL(bucket, object string, result *AccessControlPolicy)
 	return api.httpRequestWithUnmarshalXML(options, result)
 }
 
-// HeadObject Head an object and get the meta info.
+// HeadObject head an object and get the meta info.
 func (api *API) HeadObject(bucket, object string, headers map[string]string) (result http.Header, err error) {
 	var options = getDefaultRequestOptions()
 	options.Method = "HEAD"
@@ -648,7 +648,7 @@ func (api *API) HeadObject(bucket, object string, headers map[string]string) (re
 	return res.Header, nil
 }
 
-// PutObject Add an object to the bucket.
+// PutObject add an object to the bucket.
 //
 //      - bucket: an exists bucket
 //      - object: object name store on OSS
@@ -698,7 +698,7 @@ func (api *API) PutObjectACL(bucket, object, acl string) error {
 	return err
 }
 
-// CopyObject Copy an object from sourceName to name.
+// CopyObject copy an object from sourceName to name.
 func (api *API) CopyObject(sourceBucket, sourceObject, targetBucket, targetObject string,
 	headers map[string]string) (result CopyObjectResult, err error) {
 	var options = getDefaultRequestOptions()
@@ -749,7 +749,7 @@ func (api *API) AppendObject(bucket, object string, position int, body io.Reader
 
 }
 
-// DeleteObject Delete an object from the bucket.
+// DeleteObject delete an object from the bucket.
 func (api *API) DeleteObject(bucket, object string) error {
 	var options = getDefaultRequestOptions()
 	options.Method = "DELETE"
@@ -758,7 +758,7 @@ func (api *API) DeleteObject(bucket, object string) error {
 	return api.httpRequestWithUnmarshalXML(options, nil)
 }
 
-// DeleteObjects Delete multi objects in one request.
+// DeleteObjects delete multi objects in one request.
 func (api *API) DeleteObjects(bucket string, objects []string, result *DeleteResult) error {
 	var options = getDefaultRequestOptions()
 	options.Method = "POST"
