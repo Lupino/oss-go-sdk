@@ -826,7 +826,7 @@ func (api *API) GetMultiPartUpload(bucket, object, uploadID string) (*MultipartU
 	return multi, nil
 }
 
-// UploadPart upload part
+// UploadPart upload the content of io.Reader as one part.
 func (multi *MultipartUpload) UploadPart(partNumber int, body io.Reader) (string, error) {
 	var options = getDefaultRequestOptions()
 	options.Method = "PUT"
@@ -855,7 +855,7 @@ func (multi *MultipartUpload) UploadPart(partNumber int, body io.Reader) (string
 	return res.Header.Get("ETag"), nil
 }
 
-// CopyPart copy an exists object part
+// CopyPart upload a part with data copy from srouce object in source bucket
 func (multi *MultipartUpload) CopyPart(sourceBucket, sourceObject string, partNumber int,
 	sourceRange string, headers map[string]string) (string, error) {
 
@@ -882,7 +882,7 @@ func (multi *MultipartUpload) CopyPart(sourceBucket, sourceObject string, partNu
 	return result.ETag, nil
 }
 
-// CompleteUpload multipart complete upload
+// CompleteUpload finish multiupload and merge all the parts as a object.
 func (multi *MultipartUpload) CompleteUpload(parts []Part, result *CompleteMultipartUploadResult) error {
 	var options = getDefaultRequestOptions()
 	options.Method = "POST"
@@ -897,7 +897,7 @@ func (multi *MultipartUpload) CompleteUpload(parts []Part, result *CompleteMulti
 	return multi.api.httpRequestWithUnmarshalXML(options, &result)
 }
 
-// AbortUpload abort multipart upload
+// AbortUpload cancel multiupload and delete all parts
 func (multi *MultipartUpload) AbortUpload() error {
 	var options = getDefaultRequestOptions()
 	options.Method = "DELETE"
@@ -929,7 +929,7 @@ func GetDefaultListMultipartUploadOptions() *ListMultipartUploadOptions {
 	return options
 }
 
-// ListMultipartUpload list multipart upload
+// ListMultipartUpload list all multipart uploads and their parts
 func (api *API) ListMultipartUpload(bucket string, opts *ListMultipartUploadOptions) ([]*MultipartUpload, error) {
 	var options = getDefaultRequestOptions()
 	options.Method = "GET"
@@ -968,7 +968,7 @@ func (api *API) ListMultipartUpload(bucket string, opts *ListMultipartUploadOpti
 	return uploads, nil
 }
 
-// ListParts list parts
+// ListParts list all upload parts of current upload_id
 func (multi *MultipartUpload) ListParts(maxParts, partNumberMarker int,
 	result *ListPartsResult) error {
 	var options = getDefaultRequestOptions()
@@ -1007,7 +1007,7 @@ func (api *API) DeleteBucketCORS(bucket string) error {
 	return api.httpRequestWithUnmarshalXML(options, nil)
 }
 
-// OptionObject option object
+// OptionObject options object to determine if user can send the actual HTTP request
 func (api *API) OptionObject(bucket, object string, headers map[string]string) (http.Header, error) {
 	var options = getDefaultRequestOptions()
 	options.Method = "OPTIONS"
