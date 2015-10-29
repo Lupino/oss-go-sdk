@@ -35,6 +35,7 @@ package oss
 import (
 	"bytes"
 	"encoding/xml"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -1022,7 +1023,9 @@ func (api *API) OptionObject(bucket, object string, headers map[string]string) (
 	return res.Header, nil
 }
 
-// UploadLargeFile upload a large file by multipart upload api
+// UploadLargeFile upload large file, the content is read from filename.
+// The large file is splitted into many parts.
+// It will put the many parts into bucket and then merge all the parts into one object.
 func (api *API) UploadLargeFile(bucket, object, fileName string, bufSize int64,
 	headers map[string]string) (result CompleteMultipartUploadResult, err error) {
 
@@ -1079,7 +1082,8 @@ func (api *API) UploadLargeFile(bucket, object, fileName string, bufSize int64,
 	}
 
 	if uploadFailed {
-		err = multi.AbortUpload()
+		multi.AbortUpload()
+		err = errors.New("multi upload file failed")
 	} else {
 		err = multi.CompleteUpload(parts, &result)
 	}
