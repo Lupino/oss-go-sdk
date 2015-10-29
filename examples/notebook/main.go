@@ -32,7 +32,7 @@ func main() {
 	var bucket = "ossgosdknotebook"
 	var bookName = "notebook.txt"
 
-	if err = OSSAPI.PutBucket(bucket, oss.ACLPrivate, nil, nil); err != nil {
+	if err = OSSAPI.PutBucket(bucket, oss.ACLPrivate, "", nil); err != nil {
 		log.Printf("%v\n", err)
 	}
 

@@ -24,7 +24,7 @@ func main() {
 
 	var bucket = "ossgosdkwebsite"
 
-	if err = OSSAPI.PutBucket(bucket, oss.ACLPublicReadWrite, nil, nil); err != nil {
+	if err = OSSAPI.PutBucket(bucket, oss.ACLPublicReadWrite, "", nil); err != nil {
 		log.Printf("%s\n", err)
 	}
 

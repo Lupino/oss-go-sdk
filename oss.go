@@ -462,16 +462,16 @@ func (api *API) GetBucketLogging(bucket string, result *BucketLoggingStatus) err
 
 // CreateBucket create bucket
 func (api *API) CreateBucket(bucket string, acl ACLGrant, headers map[string]string) error {
-	return api.PutBucket(bucket, acl, nil, headers)
+	return api.PutBucket(bucket, acl, "", headers)
 }
 
 // PutBucket create bucket
 //
 //      - bucket: bucket name If bucket exists and not belong to current account, will throw BucketAlreadyExistsError. If bucket not exists, will create a new bucket and set it's ACL
 //      - acl: one of private public-read public-read-write
-//      - config *CreateBucketConfiguration
+//      - location: the bucket data region location, Current available: oss-cn-hangzhou, oss-cn-qingdao, oss-cn-beijing, oss-cn-hongkong and oss-cn-shenzhen If change exists bucket region, will throw BucketAlreadyExistsError. If region value invalid, will throw InvalidLocationConstraintError.
 //      - headers: HTTP header
-func (api *API) PutBucket(bucket string, acl ACLGrant, config *CreateBucketConfiguration, headers map[string]string) error {
+func (api *API) PutBucket(bucket string, acl ACLGrant, location string, headers map[string]string) error {
 	var options = getDefaultRequestOptions()
 	options.Method = "PUT"
 	options.Bucket = bucket
@@ -481,7 +481,8 @@ func (api *API) PutBucket(bucket string, acl ACLGrant, config *CreateBucketConfi
 	if acl != "" {
 		options.Headers["x-oss-acl"] = string(acl)
 	}
-	if config != nil {
+	if location != "" {
+		var config = CreateBucketConfiguration{LocationConstraint: location}
 		var data, _ = xml.Marshal(config)
 		options.Body = bytes.NewBuffer(data)
 	}

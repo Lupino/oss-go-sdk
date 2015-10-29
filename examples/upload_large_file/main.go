@@ -29,7 +29,7 @@ func main() {
 	var file = "test.bin"
 	var fp *os.File
 
-	if err = OSSAPI.PutBucket(bucket, oss.ACLPublicReadWrite, nil, nil); err != nil {
+	if err = OSSAPI.PutBucket(bucket, oss.ACLPublicReadWrite, "", nil); err != nil {
 		log.Printf("%s\n", err)
 	}
 

@@ -50,12 +50,12 @@ func main() {
 	log.Printf("GetService result: %s\n", result.Buckets)
 
 	log.Println("PutBucket")
-	if err = OSSAPI.PutBucket(bucket, oss.ACLPublicReadWrite, nil, nil); err != nil {
+	if err = OSSAPI.PutBucket(bucket, oss.ACLPublicReadWrite, "", nil); err != nil {
 		log.Printf("PutBucket Error: %s\n", err)
 	}
 
 	log.Println("PutBucket")
-	if err = OSSAPI.PutBucket(loggingBucket, oss.ACLPublicReadWrite, nil, nil); err != nil {
+	if err = OSSAPI.PutBucket(loggingBucket, oss.ACLPublicReadWrite, "", nil); err != nil {
 		log.Printf("PutBucket Error: %s\n", err)
 	}
 
